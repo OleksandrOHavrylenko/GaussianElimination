@@ -2,46 +2,79 @@
 #include<stdlib.h>
 //using namespace std;
 float** createCoefficientMatrix(int);
+void freeCoefficientMatrix(float**, int);
 void initCoefficientMatrix(float**, int);
 void printCoefficientMatrix(float**, int);
 
 void printEchelonForm(float**, const float *, int);
 void printResult(const float *, int n);
 
+void solveEquations(float** MatA, float* MatB, int n);
+
+void backSubstitution(int n, float** MatA, float* MatB, float* X);
+
+void initCoefMatrix(float** MatA, int n);
+
+void initRHSMatrix(float* MatB, int n);
+
 int main()
 {
     int  n;
-    float** MatA;
-    float* MatB;
-    float* X;
-    float divider, factor, sum;
     printf("Enter the number of unknown variables: ");
     scanf("%d", &n);
-    MatA = createCoefficientMatrix(n);
-    initCoefficientMatrix(MatA, n);
-    printCoefficientMatrix(MatA, n);
-    MatB = (float*) malloc(n * sizeof(float));
-    X = (float*) malloc(n * sizeof(float));
+    float** MatA = createCoefficientMatrix(n);
+//    initCoefficientMatrix(MatA, n);
+//    printCoefficientMatrix(MatA, n);
+    float* MatB = (float*) malloc(n * sizeof(float));
+    float* X = (float*) malloc(n * sizeof(float));
 
+    initCoefMatrix(MatA, n);
+    initRHSMatrix(MatB, n);
+    printEchelonForm(MatA, MatB, n);
 
-//reading matrix A
-//    for(i=0; i< n; i++) {
-//        for(j=0; j < n; j++) {
-//            printf("MatA[%d][%d]", i, j);
-//            scanf("%f", &MatA[i][j]);
-////            cin >> MatA[i][j];
-//        }
-//    }
-//reading matrix B
+    solveEquations( MatA, MatB, n);
+    backSubstitution(n, MatA, MatB, X);
+
+    printEchelonForm(MatA, MatB, n);
+    printResult(X, n);
+
+    freeCoefficientMatrix(MatA, n);
+    free(MatB);
+    free(X);
+    return 0;
+}
+
+void initRHSMatrix(float* MatB, int n) {
     for(int i=0; i< n; i++) {
         printf("MatB[%d]", i);
         scanf("%f", &MatB[i]);
-//        cin >> MatB[i];
     }
-    printEchelonForm(MatA, MatB, n);
-//Gauss elimination
+}
+
+void initCoefMatrix(float** MatA, int n) {
+    for(int i=0; i< n; i++) {
+        for(int j=0; j < n; j++) {
+            printf("MatA[%d][%d]", i, j);
+            scanf("%f", &MatA[i][j]);
+        }
+    }
+}
+
+void backSubstitution(int n, float** MatA, float* MatB, float* X) {// back substitution starting with last variable
+    X[n-1] = MatB[n-1];
+    for (int i = n-2; i>=0; i--) {
+// Sum up ith row using values of X already determined
+        float sum = 0.0f;
+        for (int j = i+1; j < n; j++) {
+            sum = sum + MatA[i][j] * X[j];
+        }
+        X[i] = MatB[i] - sum;
+    }
+}
+
+void solveEquations(float** MatA, float *MatB, int n) {//Gauss elimination
     for (int i=0; i< n; i++) {
-        divider = MatA[i][i];
+        float divider = MatA[i][i];
         MatA[i][i] = 1.0f;
 // divide all values in the row by the divisor
 // to recalculate all coefficients in that row
@@ -54,7 +87,7 @@ int main()
 // appropriate portion of the ith equation from it
         if (i+1 < n) {
             for (int k=i+1; k<n; k++) {
-                factor = MatA[k][i];
+                float factor = MatA[k][i];
                 MatA[k][i] = 0.0f;
                 for (int j = i+1; j < n; j++) {
                     MatA[k][j] = MatA[k][j] - factor * MatA[i][j];
@@ -63,20 +96,6 @@ int main()
             }
         }
     }
-// back substitution starting with last variable
-    X[n-1] = MatB[n-1];
-    for (int i = n-2; i>=0; i--) {
-// Sum up ith row using values of X already determined
-        sum = 0.0;
-        for (int j = i+1; j < n; j++) {
-            sum = sum + MatA[i][j] * X[j];
-        }
-        X[i] = MatB[i] - sum;
-    }
-
-    printEchelonForm(MatA, MatB, n);
-    printResult(X, n);
-    return 0;
 }
 
 void printEchelonForm(float** M, const float *RHS, int size) {
@@ -101,6 +120,13 @@ float** createCoefficientMatrix(int n) {
     }
     return matrix;
 }
+void freeCoefficientMatrix(float** M, int size) {
+    for(int i = 0; i < size; i++) {
+        free(M[i]);
+    }
+    free(M);
+}
+
 
 void initCoefficientMatrix(float** M, int size) {
     for(int i = 0; i < size; i++) {

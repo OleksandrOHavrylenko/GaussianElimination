@@ -55,8 +55,9 @@ int main() {
 }
 
 void initRHSMatrix(float *B, int n) {
+    printf("\n");
     for (int i = 0; i < n; i++) {
-        printf("MatB[%d]", i);
+        printf("B[%d] =", i);
         scanf("%f", &B[i]);
     }
 }
@@ -85,30 +86,32 @@ void backSubstitution(int n, float **A, float *B, float *X) {// back substitutio
 int solveEquations(float **A, float *B, int n) {
     for (int i = 0; i < n; i++) {
         float divider = A[i][i];
-        A[i][i] = 1.0f;
+        if(divider != 0) {
+            A[i][i] = 1.0f;
 // divide all values in the row by the divisor
 // to recalculate all coefficients in that row
-        for (int j = i + 1; j < n; j++) {
-            A[i][j] = A[i][j] / divider;
-        }
+            for (int j = i + 1; j < n; j++) {
+                A[i][j] = A[i][j] / divider;
+            }
 //Also divide the corresponding RHS element
-        B[i] = B[i] / divider;
+            B[i] = B[i] / divider;
 // now replace subsequent rows, by subtracting the
 // appropriate portion of the ith equation from it
-        if (i + 1 < n) {
-            for (int k = i + 1; k < n; k++) {
-                float factor = A[k][i];
-                A[k][i] = 0.0f;
-                for (int j = i + 1; j < n; j++) {
-                    A[k][j] = A[k][j] - factor * A[i][j];
+            if (i + 1 < n) {
+                for (int k = i + 1; k < n; k++) {
+                    float factor = A[k][i];
+                    A[k][i] = 0.0f;
+                    for (int j = i + 1; j < n; j++) {
+                        A[k][j] = A[k][j] - factor * A[i][j];
+                    }
+                    B[k] = B[k] - factor * B[i];
                 }
-                B[k] = B[k] - factor * B[i];
+            }
+            prinMatrixes(A, B, n);
+            if(!canSolve(A, B, n)) {
+                return 0;
             }
         }
-        prinMatrixes(A, B, n);
-        if(!canSolve(A, B, n)) {
-            return 0;
-        }        
     }
     return 1;
 }

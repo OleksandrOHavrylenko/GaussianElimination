@@ -1,12 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
-//using namespace std;
+
 float** createCoefficientMatrix(int);
 void freeCoefficientMatrix(float**, int);
 void initCoefficientMatrix(float**, int);
 void printCoefficientMatrix(float**, int);
 
-void printEchelonForm(float**, const float *, int);
+void prinMatrixes(float**, const float *, int);
 void printResult(const float *, int n);
 
 void solveEquations(float** MatA, float* MatB, int n);
@@ -23,19 +23,19 @@ int main()
     printf("Enter the number of unknown variables: ");
     scanf("%d", &n);
     float** MatA = createCoefficientMatrix(n);
-//    initCoefficientMatrix(MatA, n);
+    initCoefficientMatrix(MatA, n);
 //    printCoefficientMatrix(MatA, n);
     float* MatB = (float*) malloc(n * sizeof(float));
     float* X = (float*) malloc(n * sizeof(float));
 
-    initCoefMatrix(MatA, n);
+//    initCoefMatrix(MatA, n);
     initRHSMatrix(MatB, n);
-    printEchelonForm(MatA, MatB, n);
+    prinMatrixes(MatA, MatB, n);
 
     solveEquations( MatA, MatB, n);
     backSubstitution(n, MatA, MatB, X);
 
-    printEchelonForm(MatA, MatB, n);
+    prinMatrixes(MatA, MatB, n);
     printResult(X, n);
 
     freeCoefficientMatrix(MatA, n);
@@ -98,13 +98,23 @@ void solveEquations(float** MatA, float *MatB, int n) {//Gauss elimination
     }
 }
 
-void printEchelonForm(float** M, const float *RHS, int size) {
+void prinMatrixes(float** M, const float *RHS, int size) {
+    printf("\n======================================\n");
     for(int i=0; i< size; i++) {
         for (int j = 0; j < size; j++) {
+            if(j == 0) {
+                printf("%2s", "|");
+            }
             printf("%5.2f ", M[i][j]);
+            if(j == size-1) {
+                printf("%s", "|");
+            }
         }
-        printf("%10.2f\n", RHS[i]);
+        printf("%8s", "|");
+        printf("%6.2f", RHS[i]);
+        printf("%s\n", "|");
     }
+    printf("======================================\n");
 }
 
 void printResult(const float *X, int n) {

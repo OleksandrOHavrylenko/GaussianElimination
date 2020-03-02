@@ -16,7 +16,7 @@ void prinMatrixes(float **, const float *, int);
 
 void printResult(const float *, int n);
 
-int solveEquations(float **MatA, float *MatB, int n);
+bool solveEquations(float **MatA, float *MatB, int n);
 
 void backSubstitution(int n, float **MatA, float *MatB, float *X);
 
@@ -24,7 +24,7 @@ void initCoefMatrix(float **MatA, int n);
 
 void initRHSMatrix(float *MatB, int n);
 
-int isZeroRow(float **pDouble, int row, int size);
+bool isZeroRow(float **pDouble, int row, int size);
 
 bool canSolve(float **M, float *, int size);
 
@@ -109,20 +109,15 @@ void backSubstitution(int n, float **A, float *B, float *X) {// back substitutio
     }
 }
 
-int solveEquations(float **A, float *B, int n) {
+bool solveEquations(float **A, float *B, int n) {
     for (int i = 0; i < n; i++) {
         float divider = A[i][i];
         if(divider != 0) {
             A[i][i] = 1.0f;
-// divide all values in the row by the divisor
-// to recalculate all coefficients in that row
             for (int j = i + 1; j < n; j++) {
                 A[i][j] = A[i][j] / divider;
             }
-//Also divide the corresponding RHS element
             B[i] = B[i] / divider;
-// now replace subsequent rows, by subtracting the
-// appropriate portion of the ith equation from it
             if (i + 1 < n) {
                 for (int k = i + 1; k < n; k++) {
                     float factor = A[k][i];
@@ -136,30 +131,30 @@ int solveEquations(float **A, float *B, int n) {
             printf("\nКрок %d", i + 1);
             prinMatrixes(A, B, n);
             if(!canSolve(A, B, n)) {
-                return 0;
+                return false;
             }
         }
     }
-    return 1;
+    return true;
 }
 
 bool canSolve(float **A, float* B, int size) {
     for (int row = 0; row < size; ++row) {
         if(isZeroRow(A, row, size) && B[row] != 0) {
             printf("\nNo solvings because bad rank\n");
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
-int isZeroRow(float **A, int row, int size) {
+bool isZeroRow(float **A, int row, int size) {
     for (int col = 0; col < size; ++col) {
         if(A[row][col]!= 0){
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
 void prinMatrixes(float **A, const float *B, int size) {

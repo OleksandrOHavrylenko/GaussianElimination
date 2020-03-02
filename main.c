@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include <stdbool.h>
 #include <locale.h>
+#include <windows.h>
 
 float **createCoefficientMatrix(int);
 
@@ -30,11 +31,12 @@ bool canSolve(float **M, float *, int size);
 void printCommomView(int size);
 
 int main() {
-    setlocale(LC_CTYPE, "ukr");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
     int n;
     printf("Введіть кількість невідомих змінних : ");
     scanf("%d", &n);
-    printf("Загальний вигляд системи лінійних рівнянь з %d невідомими має наступний вигляд : \n");
+    printf("Загальний вигляд системи лінійних рівнянь з %d невідомими має наступний вигляд : \n", n);
     printCommomView(n);
     float **A = createCoefficientMatrix(n);
 //    initCoefficientMatrix(A, n);

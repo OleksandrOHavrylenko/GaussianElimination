@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include <stdbool.h>
+#include <locale.h>
 
 float **createCoefficientMatrix(int);
 
@@ -26,25 +27,33 @@ int isZeroRow(float **pDouble, int row, int size);
 
 bool canSolve(float **M, float *, int size);
 
+void printCommomView(int size);
+
 int main() {
+    setlocale(LC_CTYPE, "ukr");
     int n;
-    printf("Enter the number of unknown variables: ");
+    printf("Введіть кількість невідомих змінних : ");
     scanf("%d", &n);
+    printf("Загальний вигляд системи лінійних рівнянь з %d невідомими має наступний вигляд : \n");
+    printCommomView(n);
     float **A = createCoefficientMatrix(n);
-    initCoefficientMatrix(A, n);
+//    initCoefficientMatrix(A, n);
 //    printCoefficientMatrix(MatA, n);
     float *B = (float *) malloc(n * sizeof(float));
     float *X = (float *) malloc(n * sizeof(float));
 
-//    initCoefMatrix(MatA, n);
+    initCoefMatrix(A, n);
     initRHSMatrix(B, n);
+    printf("\nПочатковий вигляд системи лінійних рівнянь:");
     prinMatrixes(A, B, n);
 
     int isSolved = solveEquations(A, B, n);
     if(isSolved) {
         backSubstitution(n, A, B, X);
 
+        printf("\nПрямий хід метода Гауса завершено:");
         prinMatrixes(A, B, n);
+        printf("\nКорені системи лінійних рівнянь наступні:");
         printResult(X, n);
     }
 
@@ -54,18 +63,33 @@ int main() {
     return 0;
 }
 
-void initRHSMatrix(float *B, int n) {
+void printCommomView(int size) {
+    printf("===============================\n");
+    for(int i = 0; i < size; i++) {
+        for(int j = 0; j < size; j++) {
+            if(j == size - 1) {
+                printf("A[%d][%d]*x[%d]%s", i, j, j, " ");
+            } else {
+                printf("A[%d][%d]*x[%d]%s", i, j, j, " + ");
+            }
+        }
+        printf("= B[%d]\n", i);
+    }
+    printf("===============================\n");
+}void initRHSMatrix(float *B, int n) {
+    printf("\n Введіть з клавіатури елементи матриці B : \n");
     printf("\n");
     for (int i = 0; i < n; i++) {
-        printf("B[%d] =", i);
+        printf("B[%d] = ", i);
         scanf("%f", &B[i]);
     }
 }
 
 void initCoefMatrix(float **A, int n) {
+    printf("\nВведіть з клавіатури елементи матриці А : \n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            printf("MatA[%d][%d]", i, j);
+            printf("A[%d][%d] =%s", i, j, " ");
             scanf("%f", &A[i][j]);
         }
     }
@@ -107,6 +131,7 @@ int solveEquations(float **A, float *B, int n) {
                     B[k] = B[k] - factor * B[i];
                 }
             }
+            printf("\nКрок %d", i + 1);
             prinMatrixes(A, B, n);
             if(!canSolve(A, B, n)) {
                 return 0;
@@ -142,19 +167,20 @@ void prinMatrixes(float **A, const float *B, int size) {
             if (j == 0) {
                 printf("%2s", "|");
             }
-            printf("%5.2f ", A[i][j]);
+            printf("%7.2f ", A[i][j]);
             if (j == size - 1) {
                 printf("%s", "|");
             }
         }
         printf("%8s", "|");
-        printf("%6.2f", B[i]);
+        printf("%7.2f", B[i]);
         printf("%s\n", "|");
     }
     printf("======================================\n");
 }
 
 void printResult(const float *X, int n) {
+    printf("\n");
     for (int i = 0; i < n; i++) {
         printf("X[%d] = %5.2f;\n", i, X[i]);
     }

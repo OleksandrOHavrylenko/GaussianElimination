@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include <stdbool.h>
 #include <locale.h>
-#include <windows.h>
+//#include <windows.h>
 
 float **createCoefficientMatrix(int);
 
@@ -31,8 +31,8 @@ bool canSolve(float **M, float *, int size);
 void printCommomView(int size);
 
 int main() {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+//    SetConsoleCP(1251);
+//    SetConsoleOutputCP(1251);
     int n;
     printf("Введіть кількість невідомих змінних : ");
     scanf("%d", &n);

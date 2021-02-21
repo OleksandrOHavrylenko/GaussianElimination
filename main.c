@@ -1,8 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include <stdbool.h>
-#include <locale.h>
-//#include <windows.h>
+#include <conio.h>
+
+void menu();
 
 float **createCoefficientMatrix(int);
 
@@ -31,8 +32,7 @@ bool canSolve(float **M, float *, int size);
 void printCommomView(int size);
 
 int main() {
-//    SetConsoleCP(1251);
-//    SetConsoleOutputCP(1251);
+    menu();
     int n;
     printf("Введіть кількість невідомих змінних : ");
     scanf("%d", &n);
@@ -63,6 +63,40 @@ int main() {
     free(B);
     free(X);
     return 0;
+}
+
+void menu() {
+    int choice=0;
+    while(choice!='4')
+    {
+        system("cls");
+        printf("\n\tMENU DEMONSTRATION");
+        printf("\n\t------------------------------");
+        printf("\n\n\t 1. OPTION 1");
+        printf("\n\t 2. OPTION 2");
+        printf("\n\t 3. OPTION 3");
+        printf("\n\t 4. EXIT");
+        printf("\n\n Enter Your Choice: ");
+        choice = getche();
+        switch(choice)
+        {
+            case '1':
+                printf("\n\nYOU SELECTED OPTION 1\n");
+                break;
+            case '2':
+                printf("\n\nYOU SELECTED OPTION 2\n");
+                break;
+            case '3':
+                printf("\n\nYOU SELECTED OPTION 3\n");
+                break;
+            case '4':
+                printf("\n\nYOU SELECTED OPTION 4\n");
+                break;
+            default:
+                printf("\n\nINVALID SELECTION...Please try again\n");
+        }
+        (void)getch();
+    }
 }
 
 void printCommomView(int size) {

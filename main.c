@@ -31,12 +31,19 @@ bool canSolve(float **M, float *, int size);
 
 void printCommomView(int size);
 
+void solverFromFile();
+
 int main() {
     menu();
+
+    return 0;
+}
+
+void solverFromFile() {
     int n;
-    printf("Введіть кількість невідомих змінних : ");
+    printf("Enter the number of unknown variables : ");
     scanf("%d", &n);
-    printf("Загальний вигляд системи лінійних рівнянь з %d невідомими має наступний вигляд : \n", n);
+    printf("The general view of the system of linear equations with %d variables : \n", n);
     printCommomView(n);
     float **A = createCoefficientMatrix(n);
 //    initCoefficientMatrix(A, n);
@@ -46,23 +53,22 @@ int main() {
 
     initCoefMatrix(A, n);
     initRHSMatrix(B, n);
-    printf("\nПочатковий вигляд системи лінійних рівнянь:");
+    printf("\nThe starting view of the system of linear equations:");
     prinMatrixes(A, B, n);
 
     int isSolved = solveEquations(A, B, n);
     if(isSolved) {
         backSubstitution(n, A, B, X);
 
-        printf("\nПрямий хід метода Гауса завершено:");
+        printf("\nThe Gaussian forward stroke:");
         prinMatrixes(A, B, n);
-        printf("\nКорені системи лінійних рівнянь наступні:");
+        printf("\nThe result of the Gaussian Elimination is:");
         printResult(X, n);
     }
 
     freeCoefficientMatrix(A, n);
     free(B);
     free(X);
-    return 0;
 }
 
 void menu() {
@@ -70,27 +76,28 @@ void menu() {
     while(choice!='4')
     {
         system("cls");
-        printf("\n\tMENU DEMONSTRATION");
+        printf("\n\tMENU for Gaussian Elimination");
         printf("\n\t------------------------------");
-        printf("\n\n\t 1. OPTION 1");
-        printf("\n\t 2. OPTION 2");
-        printf("\n\t 3. OPTION 3");
+        printf("\n\n\t 1. Solve Linear equation input from console");
+        printf("\n\t 2. Solve Linear equation input from file");
+//        printf("\n\t 3. OPTION 3");
         printf("\n\t 4. EXIT");
         printf("\n\n Enter Your Choice: ");
         choice = getche();
         switch(choice)
         {
             case '1':
-                printf("\n\nYOU SELECTED OPTION 1\n");
+                printf("\n\nYou selected Solve Linear equation input from console\n");
+                solverFromFile();
                 break;
             case '2':
-                printf("\n\nYOU SELECTED OPTION 2\n");
+                printf("\n\nYou selected Solve Linear equation input from file\n");
                 break;
-            case '3':
-                printf("\n\nYOU SELECTED OPTION 3\n");
-                break;
+//            case '3':
+//                printf("\n\nYOU SELECTED OPTION 3\n");
+//                break;
             case '4':
-                printf("\n\nYOU SELECTED OPTION 4\n");
+                printf("\n\nYou selected exit\n");
                 break;
             default:
                 printf("\n\nINVALID SELECTION...Please try again\n");
@@ -113,7 +120,7 @@ void printCommomView(int size) {
     }
     printf("===============================\n");
 }void initRHSMatrix(float *B, int n) {
-    printf("\n Введіть з клавіатури елементи матриці B : \n");
+    printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
     for (int i = 0; i < n; i++) {
         printf("B[%d] = ", i);
@@ -122,7 +129,7 @@ void printCommomView(int size) {
 }
 
 void initCoefMatrix(float **A, int n) {
-    printf("\nВведіть з клавіатури елементи матриці А : \n");
+    printf("\nEnter the elements of Matrix А : \n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             printf("A[%d][%d] =%s", i, j, " ");
@@ -162,7 +169,7 @@ bool solveEquations(float **A, float *B, int n) {
                     B[k] = B[k] - factor * B[i];
                 }
             }
-            printf("\nКрок %d", i + 1);
+            printf("\nStep %d", i + 1);
             prinMatrixes(A, B, n);
             if(!canSolve(A, B, n)) {
                 return false;

@@ -31,7 +31,7 @@ bool canSolve(float **M, float *, int size);
 
 void printCommomView(int size);
 
-void solverFromFile();
+void solverFromConsole();
 
 int main() {
     menu();
@@ -39,7 +39,7 @@ int main() {
     return 0;
 }
 
-void solverFromFile() {
+void solverFromConsole() {
     int n;
     printf("Enter the number of unknown variables : ");
     scanf("%d", &n);
@@ -88,7 +88,7 @@ void menu() {
         {
             case '1':
                 printf("\n\nYou selected Solve Linear equation input from console\n");
-                solverFromFile();
+                solverFromConsole();
                 break;
             case '2':
                 printf("\n\nYou selected Solve Linear equation input from file\n");

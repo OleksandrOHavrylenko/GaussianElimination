@@ -8,6 +8,7 @@ typedef struct Matrix {
     int n;
     double **A;
     double *B;
+    double *X;
 } Matrix;
 
 void menu();
@@ -60,13 +61,11 @@ void solverFromFile() {
     matrix = createMatrixFromFile("matrix.txt");
     printf("The general view of the system of linear equations with %d variables : \n", matrix->n);
     printCommomView(matrix->n);
-    double *X = (double *) malloc(matrix->n * sizeof(double));
 
     printf("\nThe starting view of the system of linear equations:");
     prinMatrixes(matrix->A, matrix->B, matrix->n);
     printf("\n=======================================================\n");
 
-//    int isSolved = solveEquations(A, B, n);
     int singularFlag = forwardElimination(matrix->A, matrix->B, matrix->n);
 
     if(singularFlag != -1) {
@@ -80,16 +79,16 @@ void solverFromFile() {
         return;
     }
 
-    backSubstitution1(matrix->n, matrix->A, matrix->B, X);
+    backSubstitution1(matrix->n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
     prinMatrixes(matrix->A, matrix->B, matrix->n);
     printf("\nThe result of the Gaussian Elimination is:");
-    printResult(X, matrix->n);
+    printResult(matrix->X, matrix->n);
 
     freeCoefficientMatrix(matrix->A, matrix->n);
     free(matrix->B);
-    free(X);
+    free(matrix->X);
 }
 
 Matrix* createMatrixFromFile(char *fileName) {
@@ -125,6 +124,7 @@ Matrix* createMatrixFromFile(char *fileName) {
     matrix->n = n;
     matrix->A = A;
     matrix->B = B;
+    matrix->X = (double *) malloc(matrix->n * sizeof(double));
 
     return matrix;
 }
@@ -135,26 +135,26 @@ void solverFromConsole() {
     scanf("%d", &n);
     printf("The general view of the system of linear equations with %d variables : \n", n);
     printCommomView(n);
-    double **A = createCoefficientMatrix(n);
-//    initCoefficientMatrix(A, n);
-//    printCoefficientMatrix(A, n);
-    double *B = (double *) malloc(n * sizeof(double));
-    double *X = (double *) malloc(n * sizeof(double));
-    initCoefficientMatrixB(B, n);
 
-    initCoefMatrix(A, n);
-    initRHSMatrix(B, n);
+    Matrix* matrix = NULL;
+    matrix = (Matrix *) malloc(sizeof(Matrix));
+    matrix->A = createCoefficientMatrix(n);
+    matrix->B = (double *) malloc(n * sizeof(double));
+    matrix->X = (double *) malloc(n * sizeof(double));
+    matrix->n = n;
+
+    initCoefMatrix(matrix->A, matrix->n);
+    initRHSMatrix(matrix->B, n);
     printf("\nThe starting view of the system of linear equations:");
-    prinMatrixes(A, B, n);
+    prinMatrixes(matrix->A, matrix->B, n);
     printf("\n=======================================================\n");
 
-//    int isSolved = solveEquations(A, B, n);
-    int singularFlag = forwardElimination(A, B, n);
+    int singularFlag = forwardElimination(matrix->A, matrix->B, n);
 
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
 
-        if (A[singularFlag][n])
+        if (matrix->A[singularFlag][n])
             printf("Inconsistent System.");
         else
             printf("May have infinitely many "
@@ -162,16 +162,16 @@ void solverFromConsole() {
         return;
     }
 
-    backSubstitution1(n, A, B, X);
+    backSubstitution1(n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    prinMatrixes(A, B, n);
+    prinMatrixes(matrix->A, matrix->B, n);
     printf("\nThe result of the Gaussian Elimination is:");
-    printResult(X, n);
+    printResult(matrix->X, n);
 
-    freeCoefficientMatrix(A, n);
-    free(B);
-    free(X);
+    freeCoefficientMatrix(matrix->A, n);
+    free(matrix->B);
+    free(matrix->X);
 }
 
 void menu() {

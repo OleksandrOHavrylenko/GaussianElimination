@@ -1,37 +1,46 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <conio.h>
+#include <math.h>
 
 void menu();
 
-float **createCoefficientMatrix(int);
+double **createCoefficientMatrix(int);
 
-void freeCoefficientMatrix(float **, int);
+void freeCoefficientMatrix(double **, int);
 
-void initCoefficientMatrix(float **, int);
+void initCoefficientMatrix(double **, int);
+void initCoefficientMatrixB(double *, int);
 
-void printCoefficientMatrix(float **, int);
+void printCoefficientMatrix(double **, int);
 
-void prinMatrixes(float **, const float *, int);
+void prinMatrixes(double **, const double *, int);
 
-void printResult(const float *, int n);
+void printResult(const double *, int n);
 
-bool solveEquations(float **MatA, float *MatB, int n);
+bool solveEquations(double **MatA, double *MatB, int n);
 
-void backSubstitution(int n, float **MatA, float *MatB, float *X);
+int forwardElimination(double **MatA, double *MatB, int n);
 
-void initCoefMatrix(float **MatA, int n);
+void backSubstitution(int n, double **MatA, double *MatB, double *X);
 
-void initRHSMatrix(float *MatB, int n);
+void backSubstitution1(int n, double **MatA, double *MatB, double *X);
 
-bool isZeroRow(float **pDouble, int row, int size);
+void initCoefMatrix(double **MatA, int n);
 
-bool canSolve(float **M, float *, int size);
+void initRHSMatrix(double *MatB, int n);
+
+bool isZeroRow(double **pDouble, int row, int size);
+
+bool canSolve(double **M, double *, int size);
 
 void printCommomView(int size);
 
 void solverFromConsole();
+
+void swapRow(double **A, double *B, int row1, int row2, int n);
+
 
 int main() {
     menu();
@@ -45,26 +54,39 @@ void solverFromConsole() {
     scanf("%d", &n);
     printf("The general view of the system of linear equations with %d variables : \n", n);
     printCommomView(n);
-    float **A = createCoefficientMatrix(n);
+    double **A = createCoefficientMatrix(n);
 //    initCoefficientMatrix(A, n);
-//    printCoefficientMatrix(MatA, n);
-    float *B = (float *) malloc(n * sizeof(float));
-    float *X = (float *) malloc(n * sizeof(float));
+//    printCoefficientMatrix(A, n);
+    double *B = (double *) malloc(n * sizeof(double));
+    double *X = (double *) malloc(n * sizeof(double));
+    initCoefficientMatrixB(B, n);
 
     initCoefMatrix(A, n);
     initRHSMatrix(B, n);
     printf("\nThe starting view of the system of linear equations:");
     prinMatrixes(A, B, n);
+    printf("\n=======================================================\n");
 
-    int isSolved = solveEquations(A, B, n);
-    if(isSolved) {
-        backSubstitution(n, A, B, X);
+//    int isSolved = solveEquations(A, B, n);
+    int singularFlag = forwardElimination(A, B, n);
 
-        printf("\nThe Gaussian forward stroke:");
-        prinMatrixes(A, B, n);
-        printf("\nThe result of the Gaussian Elimination is:");
-        printResult(X, n);
+    if(singularFlag != -1) {
+        printf("The Matrix is Singular.\n");
+
+        if (A[singularFlag][n])
+            printf("Inconsistent System.");
+        else
+            printf("May have infinitely many "
+                   "solutions.");
+        return;
     }
+
+    backSubstitution1(n, A, B, X);
+
+    printf("\nThe Gaussian forward stroke:");
+    prinMatrixes(A, B, n);
+    printf("\nThe result of the Gaussian Elimination is:");
+    printResult(X, n);
 
     freeCoefficientMatrix(A, n);
     free(B);
@@ -72,9 +94,8 @@ void solverFromConsole() {
 }
 
 void menu() {
-    int choice=0;
-    while(choice!='4')
-    {
+    int choice = 0;
+    while (choice != '4') {
         system("cls");
         printf("\n\tMENU for Gaussian Elimination");
         printf("\n\t------------------------------");
@@ -84,8 +105,7 @@ void menu() {
         printf("\n\t 4. EXIT");
         printf("\n\n Enter Your Choice: ");
         choice = getche();
-        switch(choice)
-        {
+        switch (choice) {
             case '1':
                 printf("\n\nYou selected Solve Linear equation input from console\n");
                 solverFromConsole();
@@ -102,15 +122,15 @@ void menu() {
             default:
                 printf("\n\nINVALID SELECTION...Please try again\n");
         }
-        (void)getch();
+        (void) getch();
     }
 }
 
 void printCommomView(int size) {
     printf("===============================\n");
-    for(int i = 0; i < size; i++) {
-        for(int j = 0; j < size; j++) {
-            if(j == size - 1) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (j == size - 1) {
                 printf("A[%d][%d]*x[%d]%s", i, j, j, " ");
             } else {
                 printf("A[%d][%d]*x[%d]%s", i, j, j, " + ");
@@ -119,30 +139,47 @@ void printCommomView(int size) {
         printf("= B[%d]\n", i);
     }
     printf("===============================\n");
-}void initRHSMatrix(float *B, int n) {
+}
+
+void initRHSMatrix(double *B, int n) {
     printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
     for (int i = 0; i < n; i++) {
         printf("B[%d] = ", i);
-        scanf("%f", &B[i]);
+        scanf("%lf", &B[i]);
     }
 }
 
-void initCoefMatrix(float **A, int n) {
+void initCoefMatrix(double **A, int n) {
     printf("\nEnter the elements of Matrix А : \n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             printf("A[%d][%d] =%s", i, j, " ");
-            scanf("%f", &A[i][j]);
+            scanf("%lf", &A[i][j]);
         }
     }
 }
 
-void backSubstitution(int n, float **A, float *B, float *X) {// back substitution starting with last variable
+void backSubstitution1(int n, double **A, double *B, double *X) {// back substitution starting with last variable
+    for (int i = n - 1; i >= 0; i--) {
+        X[i] = B[i];
+        for (int j=i+1; j<n; j++)
+        {
+            /* subtract all the lhs values
+             * except the coefficient of the variable
+             * whose value is being calculated */
+            X[i] -= A[i][j]*X[j];
+        }
+        X[i] = X[i]/A[i][i];
+
+    }
+}
+
+void backSubstitution(int n, double **A, double *B, double *X) {// back substitution starting with last variable
     X[n - 1] = B[n - 1];
     for (int i = n - 2; i >= 0; i--) {
 // Sum up ith row using values of X already determined
-        float sum = 0.0f;
+        double sum = 0.0f;
         for (int j = i + 1; j < n; j++) {
             sum = sum + A[i][j] * X[j];
         }
@@ -150,10 +187,62 @@ void backSubstitution(int n, float **A, float *B, float *X) {// back substitutio
     }
 }
 
-bool solveEquations(float **A, float *B, int n) {
+int forwardElimination(double **A, double *B, int n) {
+    for (int column = 0; column < n; column++) {
+        int maxRow = column;
+        int maxValue = A[maxRow][column];
+
+        for (int row = column + 1; row < n; ++row) {
+            if (abs(A[row][column]) > maxValue) {
+                maxValue = A[row][column];
+                maxRow = row;
+            }
+        }
+
+//        printf("\nSingular: %lf ===> %d \n",A[column][maxRow], !A[column][maxRow]);
+        if (fabs(A[column][maxRow]) < 10e-7) {
+            return column;
+        }
+
+        if(maxRow != column) {
+            swapRow(A, B, column, maxRow, n);
+        }
+
+        for (int i = column+1; i < n; ++i) {
+            double f = A[i][column]/A[column][column];
+
+            for (int j = column+1; j < n; ++j) {
+                A[i][j] -= A[column][j] * f;
+            }
+
+            B[i] -= B[column] * f;
+
+            A[i][column] = 0;
+        }
+        printf("\nStep %d", column + 1);
+        prinMatrixes(A, B, n);
+    }
+    return -1;
+}
+
+void swapRow(double **A, double *B, int row1, int row2, int n) {
+    printf("Swapped rows %d and %d\n", row1, row2);
+
+    for (int k = 0; k < n; ++k) {
+        double temp = A[row1][k];
+        A[row1][k] = A[row2][k];
+        A[row2][k] = temp;
+    }
+
+    double temp = B[row1];
+    B[row1] = B[row2];
+    B[row2] = temp;
+}
+
+bool solveEquations(double **A, double *B, int n) {
     for (int i = 0; i < n; i++) {
-        float divider = A[i][i];
-        if(divider != 0) {
+        double divider = A[i][i];
+        if (divider != 0) {
             A[i][i] = 1.0f;
             for (int j = i + 1; j < n; j++) {
                 A[i][j] = A[i][j] / divider;
@@ -161,7 +250,7 @@ bool solveEquations(float **A, float *B, int n) {
             B[i] = B[i] / divider;
             if (i + 1 < n) {
                 for (int k = i + 1; k < n; k++) {
-                    float factor = A[k][i];
+                    double factor = A[k][i];
                     A[k][i] = 0.0f;
                     for (int j = i + 1; j < n; j++) {
                         A[k][j] = A[k][j] - factor * A[i][j];
@@ -171,7 +260,7 @@ bool solveEquations(float **A, float *B, int n) {
             }
             printf("\nStep %d", i + 1);
             prinMatrixes(A, B, n);
-            if(!canSolve(A, B, n)) {
+            if (!canSolve(A, B, n)) {
                 return false;
             }
         }
@@ -179,9 +268,9 @@ bool solveEquations(float **A, float *B, int n) {
     return true;
 }
 
-bool canSolve(float **A, float* B, int size) {
+bool canSolve(double **A, double *B, int size) {
     for (int row = 0; row < size; ++row) {
-        if(isZeroRow(A, row, size) && B[row] != 0) {
+        if (isZeroRow(A, row, size) && B[row] != 0) {
             printf("\nNo solvings because bad rank\n");
             return false;
         }
@@ -189,16 +278,16 @@ bool canSolve(float **A, float* B, int size) {
     return true;
 }
 
-bool isZeroRow(float **A, int row, int size) {
+bool isZeroRow(double **A, int row, int size) {
     for (int col = 0; col < size; ++col) {
-        if(A[row][col]!= 0){
+        if (A[row][col] != 0) {
             return false;
         }
     }
     return true;
 }
 
-void prinMatrixes(float **A, const float *B, int size) {
+void prinMatrixes(double **A, const double *B, int size) {
     printf("\n======================================\n");
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -217,22 +306,22 @@ void prinMatrixes(float **A, const float *B, int size) {
     printf("======================================\n");
 }
 
-void printResult(const float *X, int n) {
+void printResult(const double *X, int n) {
     printf("\n");
     for (int i = 0; i < n; i++) {
         printf("X[%d] = %5.2f;\n", i, X[i]);
     }
 }
 
-float **createCoefficientMatrix(int n) {
-    float **A = (float **) malloc(n * sizeof(float *));
+double **createCoefficientMatrix(int n) {
+    double **A = (double **) malloc(n * sizeof(double *));
     for (int i = 0; i < n; i++) {
-        A[i] = (float *) malloc(n * sizeof(float));
+        A[i] = (double *) malloc(n * sizeof(double));
     }
     return A;
 }
 
-void freeCoefficientMatrix(float **A, int size) {
+void freeCoefficientMatrix(double **A, int size) {
     for (int i = 0; i < size; i++) {
         free(A[i]);
     }
@@ -240,15 +329,36 @@ void freeCoefficientMatrix(float **A, int size) {
 }
 
 
-void initCoefficientMatrix(float **A, int size) {
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            A[i][j] = i*2 + j + 1;
-        }
-    }
+void initCoefficientMatrix(double **A, int size) {
+    A[0][0] = 1.0;
+    A[0][1] = -2.0;
+    A[0][2] = -1.0;
+    A[0][3] = 3.0;
+
+    A[1][0] = -2.0;
+    A[1][1] = 1.0;
+    A[1][2] = 3.0;
+    A[1][3] = -2.0;
+
+    A[2][0] = 2.0;
+    A[2][1] = -1.0;
+    A[2][2] = -2.0;
+    A[2][3] = 1.0;
+
+    A[3][0] = 3.0;
+    A[3][1] = -3.0;
+    A[3][2] = -2.0;
+    A[3][3] = 3.0;
 }
 
-void printCoefficientMatrix(float **A, int size) {
+void initCoefficientMatrixB(double *B, int n) {
+    B[0] = 2.0;
+    B[1] = -3.0;
+    B[2] = 2.0;
+    B[3] = 3.0;
+}
+
+void printCoefficientMatrix(double **A, int size) {
     printf("\n");
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {

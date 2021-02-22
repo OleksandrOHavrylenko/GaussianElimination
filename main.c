@@ -4,6 +4,12 @@
 #include <conio.h>
 #include <math.h>
 
+typedef struct Matrix {
+    int n;
+    double **A;
+    double *B;
+} Matrix;
+
 void menu();
 
 double **createCoefficientMatrix(int);
@@ -39,13 +45,124 @@ void printCommomView(int size);
 
 void solverFromConsole();
 
+void solverFromFile();
+
 void swapRow(double **A, double *B, int row1, int row2, int n);
 
+Matrix* createMatrixFromFile(char *fileName, double **A, double *B);
+
+void createFile(char *fileName);
 
 int main() {
     menu();
-
     return 0;
+}
+void solverFromFile() {
+    double **A = NULL;
+    double *B = NULL;
+    Matrix* matrix = NULL;
+    matrix = createMatrixFromFile("matrix.txt", A, B);
+    int n = matrix->n;
+    A = matrix->A;
+    B = matrix->B;
+    printf("The general view of the system of linear equations with %d variables : \n", n);
+    printCommomView(n);
+    double *X = (double *) malloc(n * sizeof(double));
+
+    printf("\nThe starting view of the system of linear equations:");
+    prinMatrixes(A, B, n);
+    printf("\n=======================================================\n");
+
+//    int isSolved = solveEquations(A, B, n);
+    int singularFlag = forwardElimination(A, B, n);
+
+    if(singularFlag != -1) {
+        printf("The Matrix is Singular.\n");
+
+        if (A[singularFlag][n])
+            printf("Inconsistent System.");
+        else
+            printf("May have infinitely many "
+                   "solutions.");
+        return;
+    }
+
+    backSubstitution1(n, A, B, X);
+
+    printf("\nThe Gaussian forward stroke:");
+    prinMatrixes(A, B, n);
+    printf("\nThe result of the Gaussian Elimination is:");
+    printResult(X, n);
+
+    freeCoefficientMatrix(A, n);
+    free(B);
+    free(X);
+}
+
+void createFile(char *fileName) {
+    FILE * fPtr;
+    fPtr = fopen(fileName, "w");
+    if(fPtr == NULL)
+    {
+        /* File not created hence exit */
+        printf("Unable to create file.\n");
+        exit(EXIT_FAILURE);
+    }
+    printf("Enter contents to store in file : \n");
+    char data[100];
+    fgets(data, 100, stdin);
+
+
+    /* Write data to file */
+    fputs(data, fPtr);
+
+
+    /* Close file to save file data */
+    fclose(fPtr);
+
+
+    /* Success message */
+    printf("File created and saved successfully. :) \n");
+
+}
+
+Matrix* createMatrixFromFile(char *fileName, double **A, double *B) {
+    int n;
+    FILE * matrixFile;
+    matrixFile = fopen(fileName, "r");
+    if(matrixFile == NULL)
+    {
+        printf("Unable open the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    fscanf(matrixFile, "%d", &n);
+
+    A = (double **) malloc(n * sizeof(double *));
+    for (int i = 0; i < n; i++) {
+        A[i] = (double *) malloc(n * sizeof(double));
+    }
+
+    for(int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            fscanf(matrixFile, "%lf", &A[i][j]);
+        }
+    }
+
+    B = (double *) malloc(n * sizeof(double));
+    for(int i = 0; i < n; i++){
+        fscanf(matrixFile, "%lf", &B[i]);
+    }
+    printf("\n======================\n");
+    prinMatrixes(A, B, n);
+    printf("\n======================\n");
+    fclose(matrixFile);
+
+    Matrix * matrix = (Matrix*)malloc(sizeof(Matrix));
+    matrix->n = n;
+    matrix->A = A;
+    matrix->B = B;
+
+    return matrix;
 }
 
 void solverFromConsole() {
@@ -112,6 +229,7 @@ void menu() {
                 break;
             case '2':
                 printf("\n\nYou selected Solve Linear equation input from file\n");
+                solverFromFile();
                 break;
 //            case '3':
 //                printf("\n\nYOU SELECTED OPTION 3\n");

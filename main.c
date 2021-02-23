@@ -33,9 +33,9 @@ void swapRow(double **A, double *B, int row1, int row2, int n);
 
 bool isZeroRow(double **pDouble, int row, int size);
 
-void printCommomView(int size);
+void printCommonView(int size);
 
-void printMatrixes(Matrix* matrix);
+void printMatrices(Matrix* matrix);
 
 void printResult(const double *, int n);
 
@@ -85,7 +85,7 @@ void solverFromConsole() {
     printf("Enter the number of unknown variables : ");
     scanf("%d", &n);
     printf("The general view of the system of linear equations with %d variables : \n", n);
-    printCommomView(n);
+    printCommonView(n);
 
     Matrix* matrix = NULL;
     matrix = (Matrix *) malloc(sizeof(Matrix));
@@ -97,7 +97,7 @@ void solverFromConsole() {
     initCoefMatrix(matrix->A, matrix->n);
     initRHSMatrix(matrix->B, n);
     printf("\nThe starting view of the system of linear equations:");
-    printMatrixes(matrix);
+    printMatrices(matrix);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix);
@@ -116,7 +116,7 @@ void solverFromConsole() {
     backSubstitution(n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    printMatrixes(matrix);
+    printMatrices(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, n);
 
@@ -129,10 +129,10 @@ void solverFromFile() {
     Matrix* matrix = NULL;
     matrix = createMatrixFromFile("matrix.txt");
     printf("The general view of the system of linear equations with %d variables : \n", matrix->n);
-    printCommomView(matrix->n);
+    printCommonView(matrix->n);
 
     printf("\nThe starting view of the system of linear equations:");
-    printMatrixes(matrix);
+    printMatrices(matrix);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix);
@@ -151,7 +151,7 @@ void solverFromFile() {
     backSubstitution(matrix->n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    printMatrixes(matrix);
+    printMatrices(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, matrix->n);
 
@@ -264,7 +264,7 @@ int forwardElimination(Matrix* matrix) {
         }
         printf("\nStep %d", column + 1);
 
-        printMatrixes(matrix);
+        printMatrices(matrix);
     }
     return -1;
 }
@@ -307,7 +307,7 @@ bool isZeroRow(double **A, int row, int size) {
     return true;
 }
 
-void printCommomView(int size) {
+void printCommonView(int size) {
     printf("===============================\n");
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -322,7 +322,7 @@ void printCommomView(int size) {
     printf("===============================\n");
 }
 
-void printMatrixes(Matrix* matrix) {
+void printMatrices(Matrix* matrix) {
     printf("\n======================================\n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {

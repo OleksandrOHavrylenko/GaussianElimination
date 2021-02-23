@@ -17,7 +17,7 @@ double **createCoefficientMatrix(int);
 
 void freeCoefficientMatrix(double **, int);
 
-void printMatrixes(double **, const double *, int);
+void printMatrixes(Matrix* matrix);
 
 void printResult(const double *, int n);
 
@@ -52,7 +52,7 @@ void solverFromFile() {
     printCommomView(matrix->n);
 
     printf("\nThe starting view of the system of linear equations:");
-    printMatrixes(matrix->A, matrix->B, matrix->n);
+    printMatrixes(matrix);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix->A, matrix->B, matrix->n);
@@ -71,7 +71,7 @@ void solverFromFile() {
     backSubstitution1(matrix->n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    printMatrixes(matrix->A, matrix->B, matrix->n);
+    printMatrixes(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, matrix->n);
 
@@ -135,7 +135,7 @@ void solverFromConsole() {
     initCoefMatrix(matrix->A, matrix->n);
     initRHSMatrix(matrix->B, n);
     printf("\nThe starting view of the system of linear equations:");
-    printMatrixes(matrix->A, matrix->B, n);
+    printMatrixes(matrix);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix->A, matrix->B, n);
@@ -154,7 +154,7 @@ void solverFromConsole() {
     backSubstitution1(n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    printMatrixes(matrix->A, matrix->B, n);
+    printMatrixes(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, n);
 
@@ -284,7 +284,13 @@ int forwardElimination(double **A, double *B, int n) {
             A[i][column] = 0;
         }
         printf("\nStep %d", column + 1);
-        printMatrixes(A, B, n);
+        Matrix* matrix = NULL;
+        matrix = (Matrix *) malloc(sizeof(Matrix));
+        matrix->A = A;
+        matrix->B = B;
+        matrix->X = (double *) malloc(n * sizeof(double));
+        matrix->n = n;
+        printMatrixes(matrix);
     }
     return -1;
 }
@@ -312,20 +318,20 @@ bool isZeroRow(double **A, int row, int size) {
     return true;
 }
 
-void printMatrixes(double **A, const double *B, int size) {
+void printMatrixes(Matrix* matrix) {
     printf("\n======================================\n");
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
+    for (int i = 0; i < matrix->n; i++) {
+        for (int j = 0; j < matrix->n; j++) {
             if (j == 0) {
                 printf("%2s", "|");
             }
-            printf("%7.2f ", A[i][j]);
-            if (j == size - 1) {
+            printf("%7.2f ", matrix->A[i][j]);
+            if (j == matrix->n - 1) {
                 printf("%s", "|");
             }
         }
         printf("%8s", "|");
-        printf("%7.2f", B[i]);
+        printf("%7.2f", matrix->B[i]);
         printf("%s\n", "|");
     }
     printf("======================================\n");

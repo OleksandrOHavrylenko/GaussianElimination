@@ -49,14 +49,14 @@ int main() {
 }
 
 void menu() {
-    int choice = 0;
-    while (choice != '4') {
+    int choice = -1;
+    while (choice != '0') {
         system("cls");
-        printf("\n\tMENU for Gaussian Elimination");
-        printf("\n\t------------------------------");
-        printf("\n\n\t 1. Solve Linear equation input from console");
-        printf("\n\t 2. Solve Linear equation input from file");
-        printf("\n\t 4. EXIT");
+        printf("\nMENU for Gaussian Elimination");
+        printf("\n------------------------------");
+        printf("\n\n 1. Solve Linear equation input from console");
+        printf("\n 2. Solve Linear equation input from file");
+        printf("\n 0. EXIT");
         printf("\n\n Enter Your Choice: ");
         choice = getche();
         switch (choice) {
@@ -68,7 +68,7 @@ void menu() {
                 printf("\n\nYou selected Solve Linear equation input from file\n");
                 solver(initMatrixFromFile("matrix.txt"));
                 break;
-            case '4':
+            case '0':
                 printf("\n\nYou selected exit\n");
                 break;
             default:
@@ -175,7 +175,7 @@ void initMatrixA(Matrix* matrix) {
     printf("\nEnter the elements of Matrix A : \n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
-            printf("A[%d][%d] =%s", i, j, " ");
+            printf("A[%d][%d] =%s", i+1, j+1, " ");
             scanf("%lf", &matrix->A[i][j]);
         }
     }
@@ -185,7 +185,7 @@ void initMatrixB(Matrix* matrix) {
     printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
     for (int i = 0; i < matrix->n; i++) {
-        printf("B[%d] = ", i);
+        printf("B[%d] = ", i+1);
         scanf("%lf", &matrix->B[i]);
     }
 }
@@ -245,7 +245,7 @@ void backSubstitution(Matrix* matrix) {
 }
 
 void swapRow(Matrix* matrix, int row1, int row2) {
-    printf("Swapped rows %d and %d\n", row1, row2);
+    printf("Swapped rows %d and %d\n", row1+1, row2+1);
 
     for (int k = 0; k < matrix->n; ++k) {
         double temp = matrix->A[row1][k];
@@ -272,12 +272,12 @@ void printCommonView(int size) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             if (j == size - 1) {
-                printf("A[%d][%d]*x[%d]%s", i, j, j, " ");
+                printf("A[%d][%d]*x[%d]%s", i+1, j+1, j+1, " ");
             } else {
-                printf("A[%d][%d]*x[%d]%s", i, j, j, " + ");
+                printf("A[%d][%d]*x[%d]%s", i+1, j+1, j+1, " + ");
             }
         }
-        printf("= B[%d]\n", i);
+        printf("= B[%d]\n", i+1);
     }
     printf("===============================\n");
 }
@@ -302,9 +302,9 @@ void printMatrices(const Matrix* matrix) {
 }
 
 void printResult(const Matrix* matrix) {
-    printf("\n");
+    printf("\n======================================\n");
     for (int i = 0; i < matrix->n; i++) {
-        printf("X[%d] = %5.2f;\n", i, matrix->X[i]);
+        printf("X[%d] = %5.2f;\n", i+1, matrix->X[i]);
     }
 }
 

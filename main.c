@@ -13,38 +13,118 @@ typedef struct Matrix {
 
 void menu();
 
+void solverFromConsole();
+
+void solverFromFile();
+
+Matrix* createMatrixFromFile(char *fileName);
+
 double **createCoefficientMatrix(int);
-
-void freeCoefficientMatrix(double **, int);
-
-void printMatrixes(Matrix* matrix);
-
-void printResult(const double *, int n);
-
-int forwardElimination(Matrix* matrix);
-
-void backSubstitution1(int n, double **MatA, double *MatB, double *X);
 
 void initCoefMatrix(double **MatA, int n);
 
 void initRHSMatrix(double *MatB, int n);
 
+int forwardElimination(Matrix* matrix);
+
+void backSubstitution(int n, double **MatA, double *MatB, double *X);
+
+void swapRow(double **A, double *B, int row1, int row2, int n);
+
 bool isZeroRow(double **pDouble, int row, int size);
 
 void printCommomView(int size);
 
-void solverFromConsole();
+void printMatrixes(Matrix* matrix);
 
-void solverFromFile();
+void printResult(const double *, int n);
 
-void swapRow(double **A, double *B, int row1, int row2, int n);
-
-Matrix* createMatrixFromFile(char *fileName);
+void freeCoefficientMatrix(double **, int);
 
 int main() {
     menu();
     return 0;
 }
+
+void menu() {
+    int choice = 0;
+    while (choice != '4') {
+        system("cls");
+        printf("\n\tMENU for Gaussian Elimination");
+        printf("\n\t------------------------------");
+        printf("\n\n\t 1. Solve Linear equation input from console");
+        printf("\n\t 2. Solve Linear equation input from file");
+//        printf("\n\t 3. OPTION 3");
+        printf("\n\t 4. EXIT");
+        printf("\n\n Enter Your Choice: ");
+        choice = getche();
+        switch (choice) {
+            case '1':
+                printf("\n\nYou selected Solve Linear equation input from console\n");
+                solverFromConsole();
+                break;
+            case '2':
+                printf("\n\nYou selected Solve Linear equation input from file\n");
+                solverFromFile();
+                break;
+//            case '3':
+//                printf("\n\nYOU SELECTED OPTION 3\n");
+//                break;
+            case '4':
+                printf("\n\nYou selected exit\n");
+                break;
+            default:
+                printf("\n\nINVALID SELECTION...Please try again\n");
+        }
+        (void) getch();
+    }
+}
+
+void solverFromConsole() {
+    int n;
+    printf("Enter the number of unknown variables : ");
+    scanf("%d", &n);
+    printf("The general view of the system of linear equations with %d variables : \n", n);
+    printCommomView(n);
+
+    Matrix* matrix = NULL;
+    matrix = (Matrix *) malloc(sizeof(Matrix));
+    matrix->A = createCoefficientMatrix(n);
+    matrix->B = (double *) malloc(n * sizeof(double));
+    matrix->X = (double *) malloc(n * sizeof(double));
+    matrix->n = n;
+
+    initCoefMatrix(matrix->A, matrix->n);
+    initRHSMatrix(matrix->B, n);
+    printf("\nThe starting view of the system of linear equations:");
+    printMatrixes(matrix);
+    printf("\n=======================================================\n");
+
+    int singularFlag = forwardElimination(matrix);
+
+    if(singularFlag != -1) {
+        printf("The Matrix is Singular.\n");
+
+        if (matrix->B[singularFlag] > 10e-7)
+            printf("Inconsistent System.");
+        else
+            printf("May have infinitely many "
+                   "solutions.");
+        return;
+    }
+
+    backSubstitution(n, matrix->A, matrix->B, matrix->X);
+
+    printf("\nThe Gaussian forward stroke:");
+    printMatrixes(matrix);
+    printf("\nThe result of the Gaussian Elimination is:");
+    printResult(matrix->X, n);
+
+    freeCoefficientMatrix(matrix->A, n);
+    free(matrix->B);
+    free(matrix->X);
+}
+
 void solverFromFile() {
     Matrix* matrix = NULL;
     matrix = createMatrixFromFile("matrix.txt");
@@ -68,7 +148,7 @@ void solverFromFile() {
         return;
     }
 
-    backSubstitution1(matrix->n, matrix->A, matrix->B, matrix->X);
+    backSubstitution(matrix->n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
     printMatrixes(matrix);
@@ -118,107 +198,12 @@ Matrix* createMatrixFromFile(char *fileName) {
     return matrix;
 }
 
-void solverFromConsole() {
-    int n;
-    printf("Enter the number of unknown variables : ");
-    scanf("%d", &n);
-    printf("The general view of the system of linear equations with %d variables : \n", n);
-    printCommomView(n);
-
-    Matrix* matrix = NULL;
-    matrix = (Matrix *) malloc(sizeof(Matrix));
-    matrix->A = createCoefficientMatrix(n);
-    matrix->B = (double *) malloc(n * sizeof(double));
-    matrix->X = (double *) malloc(n * sizeof(double));
-    matrix->n = n;
-
-    initCoefMatrix(matrix->A, matrix->n);
-    initRHSMatrix(matrix->B, n);
-    printf("\nThe starting view of the system of linear equations:");
-    printMatrixes(matrix);
-    printf("\n=======================================================\n");
-
-    int singularFlag = forwardElimination(matrix);
-
-    if(singularFlag != -1) {
-        printf("The Matrix is Singular.\n");
-
-        if (matrix->B[singularFlag] > 10e-7)
-            printf("Inconsistent System.");
-        else
-            printf("May have infinitely many "
-                   "solutions.");
-        return;
-    }
-
-    backSubstitution1(n, matrix->A, matrix->B, matrix->X);
-
-    printf("\nThe Gaussian forward stroke:");
-    printMatrixes(matrix);
-    printf("\nThe result of the Gaussian Elimination is:");
-    printResult(matrix->X, n);
-
-    freeCoefficientMatrix(matrix->A, n);
-    free(matrix->B);
-    free(matrix->X);
-}
-
-void menu() {
-    int choice = 0;
-    while (choice != '4') {
-        system("cls");
-        printf("\n\tMENU for Gaussian Elimination");
-        printf("\n\t------------------------------");
-        printf("\n\n\t 1. Solve Linear equation input from console");
-        printf("\n\t 2. Solve Linear equation input from file");
-//        printf("\n\t 3. OPTION 3");
-        printf("\n\t 4. EXIT");
-        printf("\n\n Enter Your Choice: ");
-        choice = getche();
-        switch (choice) {
-            case '1':
-                printf("\n\nYou selected Solve Linear equation input from console\n");
-                solverFromConsole();
-                break;
-            case '2':
-                printf("\n\nYou selected Solve Linear equation input from file\n");
-                solverFromFile();
-                break;
-//            case '3':
-//                printf("\n\nYOU SELECTED OPTION 3\n");
-//                break;
-            case '4':
-                printf("\n\nYou selected exit\n");
-                break;
-            default:
-                printf("\n\nINVALID SELECTION...Please try again\n");
-        }
-        (void) getch();
-    }
-}
-
-void printCommomView(int size) {
-    printf("===============================\n");
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            if (j == size - 1) {
-                printf("A[%d][%d]*x[%d]%s", i, j, j, " ");
-            } else {
-                printf("A[%d][%d]*x[%d]%s", i, j, j, " + ");
-            }
-        }
-        printf("= B[%d]\n", i);
-    }
-    printf("===============================\n");
-}
-
-void initRHSMatrix(double *B, int n) {
-    printf("\n Enter the elements of Matrix B : \n");
-    printf("\n");
+double **createCoefficientMatrix(int n) {
+    double **A = (double **) malloc(n * sizeof(double *));
     for (int i = 0; i < n; i++) {
-        printf("B[%d] = ", i);
-        scanf("%lf", &B[i]);
+        A[i] = (double *) malloc(n * sizeof(double));
     }
+    return A;
 }
 
 void initCoefMatrix(double **A, int n) {
@@ -231,18 +216,12 @@ void initCoefMatrix(double **A, int n) {
     }
 }
 
-void backSubstitution1(int n, double **A, double *B, double *X) {// back substitution starting with last variable
-    for (int i = n - 1; i >= 0; i--) {
-        X[i] = B[i];
-        for (int j=i+1; j<n; j++)
-        {
-            /* subtract all the lhs values
-             * except the coefficient of the variable
-             * whose value is being calculated */
-            X[i] -= A[i][j]*X[j];
-        }
-        X[i] = X[i]/A[i][i];
-
+void initRHSMatrix(double *B, int n) {
+    printf("\n Enter the elements of Matrix B : \n");
+    printf("\n");
+    for (int i = 0; i < n; i++) {
+        printf("B[%d] = ", i);
+        scanf("%lf", &B[i]);
     }
 }
 
@@ -290,6 +269,21 @@ int forwardElimination(Matrix* matrix) {
     return -1;
 }
 
+void backSubstitution(int n, double **A, double *B, double *X) {// back substitution starting with last variable
+    for (int i = n - 1; i >= 0; i--) {
+        X[i] = B[i];
+        for (int j=i+1; j<n; j++)
+        {
+            /* subtract all the lhs values
+             * except the coefficient of the variable
+             * whose value is being calculated */
+            X[i] -= A[i][j]*X[j];
+        }
+        X[i] = X[i]/A[i][i];
+
+    }
+}
+
 void swapRow(double **A, double *B, int row1, int row2, int n) {
     printf("Swapped rows %d and %d\n", row1, row2);
 
@@ -311,6 +305,21 @@ bool isZeroRow(double **A, int row, int size) {
         }
     }
     return true;
+}
+
+void printCommomView(int size) {
+    printf("===============================\n");
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (j == size - 1) {
+                printf("A[%d][%d]*x[%d]%s", i, j, j, " ");
+            } else {
+                printf("A[%d][%d]*x[%d]%s", i, j, j, " + ");
+            }
+        }
+        printf("= B[%d]\n", i);
+    }
+    printf("===============================\n");
 }
 
 void printMatrixes(Matrix* matrix) {
@@ -337,14 +346,6 @@ void printResult(const double *X, int n) {
     for (int i = 0; i < n; i++) {
         printf("X[%d] = %5.2f;\n", i, X[i]);
     }
-}
-
-double **createCoefficientMatrix(int n) {
-    double **A = (double **) malloc(n * sizeof(double *));
-    for (int i = 0; i < n; i++) {
-        A[i] = (double *) malloc(n * sizeof(double));
-    }
-    return A;
 }
 
 void freeCoefficientMatrix(double **A, int size) {

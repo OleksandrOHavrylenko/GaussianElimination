@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <conio.h>
 #include <math.h>
+#define ZERO 10e-7
 
 typedef struct Matrix {
     int n;
@@ -21,25 +22,25 @@ Matrix* createMatrixFromFile(char *fileName);
 
 double **createCoefficientMatrix(int);
 
-void initCoefMatrix(double **MatA, int n);
+void initMatrixA(Matrix* matrix);
 
-void initRHSMatrix(double *MatB, int n);
+void initMatrixB(Matrix* matrix);
 
 int forwardElimination(Matrix* matrix);
 
-void backSubstitution(int n, double **MatA, double *MatB, double *X);
+void backSubstitution(Matrix* matrix);
 
-void swapRow(double **A, double *B, int row1, int row2, int n);
+void swapRow(Matrix* matrix, int row1, int row2);
 
-bool isZeroRow(double **pDouble, int row, int size);
+bool isZeroRow(const Matrix* matrix, int row);
 
 void printCommonView(int size);
 
-void printMatrices(Matrix* matrix);
+void printMatrices(const Matrix* matrix);
 
-void printResult(const double *, int n);
+void printResult(const Matrix* matrix);
 
-void freeCoefficientMatrix(double **, int);
+void freeCoefficientMatrix(Matrix* matrix);
 
 int main() {
     menu();
@@ -94,8 +95,8 @@ void solverFromConsole() {
     matrix->X = (double *) malloc(n * sizeof(double));
     matrix->n = n;
 
-    initCoefMatrix(matrix->A, matrix->n);
-    initRHSMatrix(matrix->B, n);
+    initMatrixA(matrix);
+    initMatrixB(matrix);
     printf("\nThe starting view of the system of linear equations:");
     printMatrices(matrix);
     printf("\n=======================================================\n");
@@ -105,24 +106,21 @@ void solverFromConsole() {
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
 
-        if (matrix->B[singularFlag] > 10e-7)
+        if (matrix->B[singularFlag] > ZERO)
             printf("Inconsistent System.");
         else
-            printf("May have infinitely many "
-                   "solutions.");
+            printf("May have infinitely many solutions.");
         return;
     }
 
-    backSubstitution(n, matrix->A, matrix->B, matrix->X);
+    backSubstitution(matrix);
 
     printf("\nThe Gaussian forward stroke:");
     printMatrices(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
-    printResult(matrix->X, n);
+    printResult(matrix);
 
-    freeCoefficientMatrix(matrix->A, n);
-    free(matrix->B);
-    free(matrix->X);
+    freeCoefficientMatrix(matrix);
 }
 
 void solverFromFile() {
@@ -140,7 +138,7 @@ void solverFromFile() {
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
 
-        if (matrix->B[singularFlag] > 10e-7)
+        if (matrix->B[singularFlag] > ZERO)
             printf("Inconsistent System.");
         else
             printf("May have infinitely many "
@@ -148,16 +146,14 @@ void solverFromFile() {
         return;
     }
 
-    backSubstitution(matrix->n, matrix->A, matrix->B, matrix->X);
+    backSubstitution(matrix);
 
     printf("\nThe Gaussian forward stroke:");
     printMatrices(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
-    printResult(matrix->X, matrix->n);
+    printResult(matrix);
 
-    freeCoefficientMatrix(matrix->A, matrix->n);
-    free(matrix->B);
-    free(matrix->X);
+    freeCoefficientMatrix(matrix);
 }
 
 Matrix* createMatrixFromFile(char *fileName) {
@@ -171,10 +167,7 @@ Matrix* createMatrixFromFile(char *fileName) {
     }
     fscanf(matrixFile, "%d", &n);
 
-    double** A = (double **) malloc(n * sizeof(double *));
-    for (int i = 0; i < n; i++) {
-        A[i] = (double *) malloc(n * sizeof(double));
-    }
+    double** A = createCoefficientMatrix(n);
 
     for(int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
@@ -206,22 +199,22 @@ double **createCoefficientMatrix(int n) {
     return A;
 }
 
-void initCoefMatrix(double **A, int n) {
+void initMatrixA(Matrix* matrix) {
     printf("\nEnter the elements of Matrix А : \n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+    for (int i = 0; i < matrix->n; i++) {
+        for (int j = 0; j < matrix->n; j++) {
             printf("A[%d][%d] =%s", i, j, " ");
-            scanf("%lf", &A[i][j]);
+            scanf("%lf", &matrix->A[i][j]);
         }
     }
 }
 
-void initRHSMatrix(double *B, int n) {
+void initMatrixB(Matrix* matrix) {
     printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < matrix->n; i++) {
         printf("B[%d] = ", i);
-        scanf("%lf", &B[i]);
+        scanf("%lf", &matrix->B[i]);
     }
 }
 
@@ -237,20 +230,19 @@ int forwardElimination(Matrix* matrix) {
             }
         }
 
-//        printf("\nSingular: %lf ===> %d \n",A[column][maxRow], !A[column][maxRow]);
-        if (fabs(matrix->A[column][maxRow]) < 10e-7) {
-            if (isZeroRow(matrix->A, maxRow, matrix->n)) {
+        if (fabs(matrix->A[column][maxRow]) < ZERO) {
+            if (isZeroRow(matrix, maxRow)) {
                 return column;
             }
         }
 
         if(maxRow != column) {
-            swapRow(matrix->A, matrix->B, column, maxRow, matrix->n);
+            swapRow(matrix, column, maxRow);
         }
 
         for (int i = column+1; i < matrix->n; ++i) {
             double divider = matrix->A[column][column];
-            if (fabs(divider) > 10e-7) {
+            if (fabs(divider) > ZERO) {
                 double f = matrix->A[i][column] / divider;
 
                 for (int j = column+1; j < matrix->n; ++j) {
@@ -269,38 +261,37 @@ int forwardElimination(Matrix* matrix) {
     return -1;
 }
 
-void backSubstitution(int n, double **A, double *B, double *X) {// back substitution starting with last variable
-    for (int i = n - 1; i >= 0; i--) {
-        X[i] = B[i];
-        for (int j=i+1; j<n; j++)
+void backSubstitution(Matrix* matrix) {// back substitution starting with last variable
+    for (int i = matrix->n - 1; i >= 0; i--) {
+        matrix->X[i] = matrix->B[i];
+        for (int j=i+1; j<matrix->n; j++)
         {
             /* subtract all the lhs values
              * except the coefficient of the variable
              * whose value is being calculated */
-            X[i] -= A[i][j]*X[j];
+            matrix->X[i] -= matrix->A[i][j] * matrix->X[j];
         }
-        X[i] = X[i]/A[i][i];
-
+        matrix->X[i] = matrix->X[i] / matrix->A[i][i];
     }
 }
 
-void swapRow(double **A, double *B, int row1, int row2, int n) {
+void swapRow(Matrix* matrix, int row1, int row2) {
     printf("Swapped rows %d and %d\n", row1, row2);
 
-    for (int k = 0; k < n; ++k) {
-        double temp = A[row1][k];
-        A[row1][k] = A[row2][k];
-        A[row2][k] = temp;
+    for (int k = 0; k < matrix->n; ++k) {
+        double temp = matrix->A[row1][k];
+        matrix->A[row1][k] = matrix->A[row2][k];
+        matrix->A[row2][k] = temp;
     }
 
-    double temp = B[row1];
-    B[row1] = B[row2];
-    B[row2] = temp;
+    double temp = matrix->B[row1];
+    matrix->B[row1] = matrix->B[row2];
+    matrix->B[row2] = temp;
 }
 
-bool isZeroRow(double **A, int row, int size) {
-    for (int col = 0; col < size; ++col) {
-        if (fabs(A[row][col]) > 10e-7) {
+bool isZeroRow(const Matrix* matrix, int row) {
+    for (int col = 0; col < matrix->n; ++col) {
+        if (fabs(matrix->A[row][col]) > ZERO) {
             return false;
         }
     }
@@ -322,7 +313,7 @@ void printCommonView(int size) {
     printf("===============================\n");
 }
 
-void printMatrices(Matrix* matrix) {
+void printMatrices(const Matrix* matrix) {
     printf("\n======================================\n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
@@ -341,16 +332,19 @@ void printMatrices(Matrix* matrix) {
     printf("======================================\n");
 }
 
-void printResult(const double *X, int n) {
+void printResult(const Matrix* matrix) {
     printf("\n");
-    for (int i = 0; i < n; i++) {
-        printf("X[%d] = %5.2f;\n", i, X[i]);
+    for (int i = 0; i < matrix->n; i++) {
+        printf("X[%d] = %5.2f;\n", i, matrix->X[i]);
     }
 }
 
-void freeCoefficientMatrix(double **A, int size) {
-    for (int i = 0; i < size; i++) {
-        free(A[i]);
+void freeCoefficientMatrix(Matrix* matrix) {
+    for (int i = 0; i < matrix->n; i++) {
+        free(matrix->A[i]);
     }
-    free(A);
+    free(matrix->A);
+
+    free(matrix->B);
+    free(matrix->X);
 }

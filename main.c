@@ -71,7 +71,7 @@ void solverFromFile() {
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
 
-        if (matrix->A[singularFlag][matrix->n])
+        if (matrix->B[singularFlag] > 10e-7)
             printf("Inconsistent System.");
         else
             printf("May have infinitely many "
@@ -154,7 +154,7 @@ void solverFromConsole() {
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
 
-        if (matrix->A[singularFlag][n])
+        if (matrix->B[singularFlag] > 10e-7)
             printf("Inconsistent System.");
         else
             printf("May have infinitely many "
@@ -272,10 +272,10 @@ void backSubstitution(int n, double **A, double *B, double *X) {// back substitu
 int forwardElimination(double **A, double *B, int n) {
     for (int column = 0; column < n; column++) {
         int maxRow = column;
-        int maxValue = A[maxRow][column];
+        double maxValue = A[maxRow][column];
 
         for (int row = column + 1; row < n; ++row) {
-            if (abs(A[row][column]) > maxValue) {
+            if (fabs(A[row][column]) > maxValue) {
                 maxValue = A[row][column];
                 maxRow = row;
             }
@@ -283,7 +283,9 @@ int forwardElimination(double **A, double *B, int n) {
 
 //        printf("\nSingular: %lf ===> %d \n",A[column][maxRow], !A[column][maxRow]);
         if (fabs(A[column][maxRow]) < 10e-7) {
-            return column;
+            if (isZeroRow(A, maxRow, n)) {
+                return column;
+            }
         }
 
         if(maxRow != column) {
@@ -291,13 +293,16 @@ int forwardElimination(double **A, double *B, int n) {
         }
 
         for (int i = column+1; i < n; ++i) {
-            double f = A[i][column]/A[column][column];
+            double divider = A[column][column];
+            if (fabs(divider) > 10e-7) {
+                double f = A[i][column] / divider;
 
-            for (int j = column+1; j < n; ++j) {
-                A[i][j] -= A[column][j] * f;
+                for (int j = column+1; j < n; ++j) {
+                    A[i][j] -= A[column][j] * f;
+                }
+
+                B[i] -= B[column] * f;
             }
-
-            B[i] -= B[column] * f;
 
             A[i][column] = 0;
         }
@@ -362,7 +367,7 @@ bool canSolve(double **A, double *B, int size) {
 
 bool isZeroRow(double **A, int row, int size) {
     for (int col = 0; col < size; ++col) {
-        if (A[row][col] != 0) {
+        if (fabs(A[row][col]) > 10e-7) {
             return false;
         }
     }

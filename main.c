@@ -17,20 +17,11 @@ double **createCoefficientMatrix(int);
 
 void freeCoefficientMatrix(double **, int);
 
-void initCoefficientMatrix(double **, int);
-void initCoefficientMatrixB(double *, int);
-
-void printCoefficientMatrix(double **, int);
-
-void prinMatrixes(double **, const double *, int);
+void printMatrixes(double **, const double *, int);
 
 void printResult(const double *, int n);
 
-bool solveEquations(double **MatA, double *MatB, int n);
-
 int forwardElimination(double **MatA, double *MatB, int n);
-
-void backSubstitution(int n, double **MatA, double *MatB, double *X);
 
 void backSubstitution1(int n, double **MatA, double *MatB, double *X);
 
@@ -39,8 +30,6 @@ void initCoefMatrix(double **MatA, int n);
 void initRHSMatrix(double *MatB, int n);
 
 bool isZeroRow(double **pDouble, int row, int size);
-
-bool canSolve(double **M, double *, int size);
 
 void printCommomView(int size);
 
@@ -63,7 +52,7 @@ void solverFromFile() {
     printCommomView(matrix->n);
 
     printf("\nThe starting view of the system of linear equations:");
-    prinMatrixes(matrix->A, matrix->B, matrix->n);
+    printMatrixes(matrix->A, matrix->B, matrix->n);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix->A, matrix->B, matrix->n);
@@ -82,7 +71,7 @@ void solverFromFile() {
     backSubstitution1(matrix->n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    prinMatrixes(matrix->A, matrix->B, matrix->n);
+    printMatrixes(matrix->A, matrix->B, matrix->n);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, matrix->n);
 
@@ -146,7 +135,7 @@ void solverFromConsole() {
     initCoefMatrix(matrix->A, matrix->n);
     initRHSMatrix(matrix->B, n);
     printf("\nThe starting view of the system of linear equations:");
-    prinMatrixes(matrix->A, matrix->B, n);
+    printMatrixes(matrix->A, matrix->B, n);
     printf("\n=======================================================\n");
 
     int singularFlag = forwardElimination(matrix->A, matrix->B, n);
@@ -165,7 +154,7 @@ void solverFromConsole() {
     backSubstitution1(n, matrix->A, matrix->B, matrix->X);
 
     printf("\nThe Gaussian forward stroke:");
-    prinMatrixes(matrix->A, matrix->B, n);
+    printMatrixes(matrix->A, matrix->B, n);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix->X, n);
 
@@ -257,18 +246,6 @@ void backSubstitution1(int n, double **A, double *B, double *X) {// back substit
     }
 }
 
-void backSubstitution(int n, double **A, double *B, double *X) {// back substitution starting with last variable
-    X[n - 1] = B[n - 1];
-    for (int i = n - 2; i >= 0; i--) {
-// Sum up ith row using values of X already determined
-        double sum = 0.0f;
-        for (int j = i + 1; j < n; j++) {
-            sum = sum + A[i][j] * X[j];
-        }
-        X[i] = B[i] - sum;
-    }
-}
-
 int forwardElimination(double **A, double *B, int n) {
     for (int column = 0; column < n; column++) {
         int maxRow = column;
@@ -307,7 +284,7 @@ int forwardElimination(double **A, double *B, int n) {
             A[i][column] = 0;
         }
         printf("\nStep %d", column + 1);
-        prinMatrixes(A, B, n);
+        printMatrixes(A, B, n);
     }
     return -1;
 }
@@ -326,45 +303,6 @@ void swapRow(double **A, double *B, int row1, int row2, int n) {
     B[row2] = temp;
 }
 
-bool solveEquations(double **A, double *B, int n) {
-    for (int i = 0; i < n; i++) {
-        double divider = A[i][i];
-        if (divider != 0) {
-            A[i][i] = 1.0f;
-            for (int j = i + 1; j < n; j++) {
-                A[i][j] = A[i][j] / divider;
-            }
-            B[i] = B[i] / divider;
-            if (i + 1 < n) {
-                for (int k = i + 1; k < n; k++) {
-                    double factor = A[k][i];
-                    A[k][i] = 0.0f;
-                    for (int j = i + 1; j < n; j++) {
-                        A[k][j] = A[k][j] - factor * A[i][j];
-                    }
-                    B[k] = B[k] - factor * B[i];
-                }
-            }
-            printf("\nStep %d", i + 1);
-            prinMatrixes(A, B, n);
-            if (!canSolve(A, B, n)) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool canSolve(double **A, double *B, int size) {
-    for (int row = 0; row < size; ++row) {
-        if (isZeroRow(A, row, size) && B[row] != 0) {
-            printf("\nNo solvings because bad rank\n");
-            return false;
-        }
-    }
-    return true;
-}
-
 bool isZeroRow(double **A, int row, int size) {
     for (int col = 0; col < size; ++col) {
         if (fabs(A[row][col]) > 10e-7) {
@@ -374,7 +312,7 @@ bool isZeroRow(double **A, int row, int size) {
     return true;
 }
 
-void prinMatrixes(double **A, const double *B, int size) {
+void printMatrixes(double **A, const double *B, int size) {
     printf("\n======================================\n");
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -413,44 +351,4 @@ void freeCoefficientMatrix(double **A, int size) {
         free(A[i]);
     }
     free(A);
-}
-
-
-void initCoefficientMatrix(double **A, int size) {
-    A[0][0] = 1.0;
-    A[0][1] = -2.0;
-    A[0][2] = -1.0;
-    A[0][3] = 3.0;
-
-    A[1][0] = -2.0;
-    A[1][1] = 1.0;
-    A[1][2] = 3.0;
-    A[1][3] = -2.0;
-
-    A[2][0] = 2.0;
-    A[2][1] = -1.0;
-    A[2][2] = -2.0;
-    A[2][3] = 1.0;
-
-    A[3][0] = 3.0;
-    A[3][1] = -3.0;
-    A[3][2] = -2.0;
-    A[3][3] = 3.0;
-}
-
-void initCoefficientMatrixB(double *B, int n) {
-    B[0] = 2.0;
-    B[1] = -3.0;
-    B[2] = 2.0;
-    B[3] = 3.0;
-}
-
-void printCoefficientMatrix(double **A, int size) {
-    printf("\n");
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            printf("%5.2f", A[i][j]);
-        }
-        printf("\n");
-    }
 }

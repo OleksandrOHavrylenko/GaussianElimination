@@ -21,7 +21,7 @@ void printMatrixes(Matrix* matrix);
 
 void printResult(const double *, int n);
 
-int forwardElimination(double **MatA, double *MatB, int n);
+int forwardElimination(Matrix* matrix);
 
 void backSubstitution1(int n, double **MatA, double *MatB, double *X);
 
@@ -55,7 +55,7 @@ void solverFromFile() {
     printMatrixes(matrix);
     printf("\n=======================================================\n");
 
-    int singularFlag = forwardElimination(matrix->A, matrix->B, matrix->n);
+    int singularFlag = forwardElimination(matrix);
 
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
@@ -138,7 +138,7 @@ void solverFromConsole() {
     printMatrixes(matrix);
     printf("\n=======================================================\n");
 
-    int singularFlag = forwardElimination(matrix->A, matrix->B, n);
+    int singularFlag = forwardElimination(matrix);
 
     if(singularFlag != -1) {
         printf("The Matrix is Singular.\n");
@@ -246,50 +246,45 @@ void backSubstitution1(int n, double **A, double *B, double *X) {// back substit
     }
 }
 
-int forwardElimination(double **A, double *B, int n) {
-    for (int column = 0; column < n; column++) {
+int forwardElimination(Matrix* matrix) {
+    for (int column = 0; column < matrix->n; column++) {
         int maxRow = column;
-        double maxValue = A[maxRow][column];
+        double maxValue = matrix->A[maxRow][column];
 
-        for (int row = column + 1; row < n; ++row) {
-            if (fabs(A[row][column]) > maxValue) {
-                maxValue = A[row][column];
+        for (int row = column + 1; row < matrix->n; ++row) {
+            if (fabs(matrix->A[row][column]) > maxValue) {
+                maxValue = matrix->A[row][column];
                 maxRow = row;
             }
         }
 
 //        printf("\nSingular: %lf ===> %d \n",A[column][maxRow], !A[column][maxRow]);
-        if (fabs(A[column][maxRow]) < 10e-7) {
-            if (isZeroRow(A, maxRow, n)) {
+        if (fabs(matrix->A[column][maxRow]) < 10e-7) {
+            if (isZeroRow(matrix->A, maxRow, matrix->n)) {
                 return column;
             }
         }
 
         if(maxRow != column) {
-            swapRow(A, B, column, maxRow, n);
+            swapRow(matrix->A, matrix->B, column, maxRow, matrix->n);
         }
 
-        for (int i = column+1; i < n; ++i) {
-            double divider = A[column][column];
+        for (int i = column+1; i < matrix->n; ++i) {
+            double divider = matrix->A[column][column];
             if (fabs(divider) > 10e-7) {
-                double f = A[i][column] / divider;
+                double f = matrix->A[i][column] / divider;
 
-                for (int j = column+1; j < n; ++j) {
-                    A[i][j] -= A[column][j] * f;
+                for (int j = column+1; j < matrix->n; ++j) {
+                    matrix->A[i][j] -= matrix->A[column][j] * f;
                 }
 
-                B[i] -= B[column] * f;
+                matrix->B[i] -= matrix->B[column] * f;
             }
 
-            A[i][column] = 0;
+            matrix->A[i][column] = 0;
         }
         printf("\nStep %d", column + 1);
-        Matrix* matrix = NULL;
-        matrix = (Matrix *) malloc(sizeof(Matrix));
-        matrix->A = A;
-        matrix->B = B;
-        matrix->X = (double *) malloc(n * sizeof(double));
-        matrix->n = n;
+
         printMatrixes(matrix);
     }
     return -1;

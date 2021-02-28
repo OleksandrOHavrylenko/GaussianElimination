@@ -41,7 +41,7 @@ void printMatrices(const Matrix* matrix);
 
 void printResult(const Matrix* matrix);
 
-void freeCoefficientMatrix(Matrix* matrix);
+void freeMemory(Matrix* matrix);
 
 int main() {
     menu();
@@ -98,7 +98,7 @@ void solver(Matrix* matrix) {
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix);
 
-    freeCoefficientMatrix(matrix);
+    freeMemory(matrix);
 }
 
 Matrix* initMatrixFromConsole() {
@@ -191,11 +191,12 @@ void initMatrixB(Matrix* matrix) {
 }
 
 int forwardElimination(Matrix* matrix) {
+    int nextRow = 0;
     for (int column = 0; column < matrix->n; column++) {
         int maxRow = column;
         double maxValue = matrix->A[maxRow][column];
 
-        for (int row = column + 1; row < matrix->n; ++row) {
+        for (int row = nextRow; row < matrix->n; ++row) {
             if (fabs(matrix->A[row][column]) > maxValue) {
                 maxValue = matrix->A[row][column];
                 maxRow = row;
@@ -206,29 +207,30 @@ int forwardElimination(Matrix* matrix) {
             if (isZeroRow(matrix, maxRow)) {
                 return column;
             }
-        }
-
-        if(maxRow != column) {
-            swapRow(matrix, column, maxRow);
-        }
-
-        for (int i = column+1; i < matrix->n; ++i) {
-            double divider = matrix->A[column][column];
-            if (fabs(divider) > ZERO) {
-                double f = matrix->A[i][column] / divider;
-
-                for (int j = column+1; j < matrix->n; ++j) {
-                    matrix->A[i][j] -= matrix->A[column][j] * f;
-                }
-
-                matrix->B[i] -= matrix->B[column] * f;
+        } else {
+            if(maxRow != column) {
+                swapRow(matrix, nextRow, maxRow);
             }
 
-            matrix->A[i][column] = 0;
-        }
-        printf("\nStep %d", column + 1);
+            for (int i = column+1; i < matrix->n; ++i) {
+                double divider = matrix->A[column][column];
+                if (fabs(divider) > ZERO) {
+                    double f = matrix->A[i][column] / divider;
 
-        printMatrices(matrix);
+                    for (int j = column+1; j < matrix->n; ++j) {
+                        matrix->A[i][j] -= matrix->A[column][j] * f;
+                    }
+
+                    matrix->B[i] -= matrix->B[column] * f;
+                }
+
+                matrix->A[i][column] = 0;
+            }
+            printf("\nStep %d", column + 1);
+
+            printMatrices(matrix);
+            nextRow++;
+        }
     }
     return -1;
 }
@@ -308,7 +310,7 @@ void printResult(const Matrix* matrix) {
     }
 }
 
-void freeCoefficientMatrix(Matrix* matrix) {
+void freeMemory(Matrix* matrix) {
     for (int i = 0; i < matrix->n; i++) {
         free(matrix->A[i]);
     }

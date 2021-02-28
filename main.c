@@ -5,17 +5,22 @@
 #include "gauss.h"
 #include "util.h"
 
-void menu();
+void menu(Matrix* matrix);
 
 
 int main() {
 
-    menu();
+    Matrix * matrix = (Matrix*)malloc(sizeof(Matrix));
+    matrix->n = 0;
+
+    menu(matrix);
+
+    freeMemory(matrix);
 
     return 0;
 }
 
-void menu() {
+void menu(Matrix* matrix) {
     int choice = -1;
     while (choice != '0') {
         system("cls");
@@ -29,11 +34,11 @@ void menu() {
         switch (choice) {
             case '1':
                 printf("\n\nYou selected Solve Linear equation input from console\n");
-                solver(initMatrixFromConsole());
+                solver(initMatrixFromConsole(matrix));
                 break;
             case '2':
                 printf("\n\nYou selected Solve Linear equation input from file\n");
-                solver(initMatrixFromFile("matrix.txt"));
+                solver(initMatrixFromFile(matrix, "matrix.txt"));
                 break;
             case '0':
                 printf("\n\nYou selected exit\n");

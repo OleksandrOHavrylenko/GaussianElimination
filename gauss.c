@@ -24,8 +24,6 @@ void solver(Matrix* matrix) {
     printMatrices(matrix);
     printf("\nThe result of the Gaussian Elimination is:");
     printResult(matrix);
-
-    freeMemory(matrix);
 }
 
 int forwardElimination(Matrix* matrix) {

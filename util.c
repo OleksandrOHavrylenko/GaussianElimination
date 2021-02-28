@@ -4,18 +4,14 @@
 #include "util.h"
 #include "gauss.h"
 
-Matrix* initMatrixFromConsole() {
+Matrix* initMatrixFromConsole(Matrix* matrix) {
     int n = 0;
     printf("Enter the number of unknown variables : ");
     scanf("%d", &n);
     printf("The general view of the system of linear equations with %d variables : \n", n);
     printCommonView(n);
 
-    Matrix * matrix = (Matrix*)malloc(sizeof(Matrix));
-    matrix->A = createCoefficientMatrix(n);
-    matrix->B = (double *) malloc(n * sizeof(double));
-    matrix->X = (double *) malloc(n * sizeof(double));
-    matrix->n = n;
+    matrix = allocateMatrix(matrix, n);
 
     initMatrixA(matrix);
     initMatrixB(matrix);
@@ -25,7 +21,15 @@ Matrix* initMatrixFromConsole() {
     return matrix;
 }
 
-Matrix* initMatrixFromFile(char *fileName) {
+Matrix* allocateMatrix(Matrix* matrix, int n) {
+    matrix->A = createCoefficientMatrix(n);
+    matrix->B = (double *) malloc(n * sizeof(double));
+    matrix->X = (double *) malloc(n * sizeof(double));
+    matrix->n = n;
+    return matrix;
+}
+
+Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     int n;
     FILE * matrixFile;
     matrixFile = fopen(fileName, "r");
@@ -51,11 +55,10 @@ Matrix* initMatrixFromFile(char *fileName) {
 
     fclose(matrixFile);
 
-    Matrix * matrix = (Matrix*)malloc(sizeof(Matrix));
+    matrix = allocateMatrix(matrix, n);
     matrix->n = n;
     matrix->A = A;
     matrix->B = B;
-    matrix->X = (double *) malloc(matrix->n * sizeof(double));
 
     printf("The general view of the system of linear equations with %d variables : \n", matrix->n);
     printCommonView(matrix->n);
@@ -66,7 +69,7 @@ Matrix* initMatrixFromFile(char *fileName) {
     return matrix;
 }
 
-double **createCoefficientMatrix(int n) {
+double** createCoefficientMatrix(int n) {
     double **A = (double **) malloc(n * sizeof(double *));
     for (int i = 0; i < n; i++) {
         A[i] = (double *) malloc(n * sizeof(double));

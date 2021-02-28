@@ -3,11 +3,13 @@
 
 #include "gauss.h"
 
-Matrix *initMatrixFromConsole();
+Matrix* allocateMatrix(Matrix* matrix, int n);
 
-Matrix* initMatrixFromFile(char *fileName);
+Matrix* initMatrixFromConsole(Matrix* matrix);
 
-double **createCoefficientMatrix(int);
+Matrix* initMatrixFromFile(Matrix* matrix, char *fileName);
+
+double** createCoefficientMatrix(int);
 
 void initMatrixA(Matrix* matrix);
 

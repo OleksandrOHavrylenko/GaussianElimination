@@ -1,82 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <conio.h>
 #include <math.h>
 
-#define ZERO 10e-7
-
-typedef struct Matrix {
-    int n;
-    double **A;
-    double *B;
-    double *X;
-} Matrix;
-
-void menu();
-
-void solver(Matrix* matrix);
-
-Matrix *initMatrixFromConsole();
-
-Matrix* initMatrixFromFile(char *fileName);
-
-double **createCoefficientMatrix(int);
-
-void initMatrixA(Matrix* matrix);
-
-void initMatrixB(Matrix* matrix);
-
-int forwardElimination(Matrix* matrix);
-
-void backSubstitution(Matrix* matrix);
-
-void swapRow(Matrix* matrix, int row1, int row2);
-
-bool isZeroRow(const Matrix* matrix, int row);
-
-void printCommonView(int size);
-
-void printMatrices(const Matrix* matrix);
-
-void printResult(const Matrix* matrix);
-
-void freeMemory(Matrix* matrix);
-
-int main() {
-    menu();
-    return 0;
-}
-
-void menu() {
-    int choice = -1;
-    while (choice != '0') {
-        system("cls");
-        printf("\nMENU for Gaussian Elimination");
-        printf("\n------------------------------");
-        printf("\n\n 1. Solve Linear equation input from console");
-        printf("\n 2. Solve Linear equation input from file");
-        printf("\n 0. EXIT");
-        printf("\n\n Enter Your Choice: ");
-        choice = getche();
-        switch (choice) {
-            case '1':
-                printf("\n\nYou selected Solve Linear equation input from console\n");
-                solver(initMatrixFromConsole());
-                break;
-            case '2':
-                printf("\n\nYou selected Solve Linear equation input from file\n");
-                solver(initMatrixFromFile("matrix.txt"));
-                break;
-            case '0':
-                printf("\n\nYou selected exit\n");
-                break;
-            default:
-                printf("\n\nINVALID SELECTION...Please try again\n");
-        }
-        (void) getch();
-    }
-}
+#include "gauss.h"
 
 void solver(Matrix* matrix) {
     int singularFlag = forwardElimination(matrix);
@@ -260,13 +186,13 @@ void swapRow(Matrix* matrix, int row1, int row2) {
     matrix->B[row2] = temp;
 }
 
-bool isZeroRow(const Matrix* matrix, int row) {
+int isZeroRow(const Matrix* matrix, int row) {
     for (int col = 0; col < matrix->n; ++col) {
         if (fabs(matrix->A[row][col]) > ZERO) {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
 void printCommonView(int size) {

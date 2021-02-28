@@ -3,6 +3,7 @@
 #include <conio.h>
 
 #include "gauss.h"
+#include "util.h"
 
 void menu();
 

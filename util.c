@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 #include "util.h"
 #include "gauss.h"
 
 Matrix* initMatrixFromConsole(Matrix* matrix) {
     int n = 0;
-    printf("Enter the number of unknown variables : ");
-    scanf("%d", &n);
+    char *message = (char*)malloc(45 * sizeof(char));
+    sprintf(message,"Enter the number of unknown variables : ");
+    printf("%s", message);
+    n = getInt(message);
     printf("The general view of the system of linear equations with %d variables : \n", n);
     printCommonView(n);
 
@@ -81,8 +85,10 @@ void initMatrixA(Matrix* matrix) {
     printf("\nEnter the elements of Matrix A : \n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
-            printf("A[%d][%d] =%s", i+1, j+1, " ");
-            scanf("%lf", &matrix->A[i][j]);
+            char *message = (char*)malloc(10 * sizeof(char));
+            sprintf(message,"A[%d][%d] =%s", i+1, j+1, " ");
+            printf("%s", message);
+            matrix->A[i][j] = getDouble(message);
         }
     }
 }
@@ -91,9 +97,62 @@ void initMatrixB(Matrix* matrix) {
     printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
     for (int i = 0; i < matrix->n; i++) {
-        printf("B[%d] = ", i+1);
-        scanf("%lf", &matrix->B[i]);
+        char *message = (char*)malloc(10 * sizeof(char));
+        sprintf(message,"B[%d] = ", i+1);
+        printf("%s", message);
+        matrix->B[i] = getDouble(message);
     }
+}
+
+int getInt(char* message) {
+    char* input = input_string();
+    char *endptr;
+    errno = 0;
+    long l = strtol(input, &endptr, 10);
+    while (errno || *endptr != '\0' || input == endptr || l < 1 || l > INT_MAX) {
+        if(l < 1) {
+            printf("The number should be a positive integer\n");
+        } else {
+            printf("Not a integer, please try again\n");
+        }
+        printf("%s", message);
+        free(input);
+        input = input_string();
+        l = strtol(input, &endptr, 10);
+    }
+    free(input);
+    return l;
+}
+
+double getDouble(char* message) {
+    char* input = input_string();
+    char *endptr;
+    errno = 0;
+    double l = strtod(input, &endptr);
+    while (errno || *endptr != '\0' || input == endptr || l < INT_MIN || l > INT_MAX) {
+        printf("Not a number, please try again\n");
+        printf("%s", message);
+        free(input);
+        input = input_string();
+        l = strtod(input, &endptr);
+    }
+    free(input);
+    return l;
+}
+
+char * input_string()
+{
+    char buff[BUFF];
+    char * input = NULL;
+    if (fgets(buff, BUFF, stdin))
+    {
+        buff[strcspn(buff, "\n")] = 0;
+        input = (char *) malloc(strlen(buff)+1);
+        if (!input) exit(1);
+        strcpy(input, buff);
+        return input;
+    }
+    return "Invalid input";
 }
 
 void printCommonView(int size) {

@@ -35,29 +35,29 @@ Matrix* allocateMatrix(Matrix* matrix, int n) {
 
 Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     int n;
-    FILE * matrixFile;
-    matrixFile = fopen(fileName, "r");
-    if(matrixFile == NULL)
+    FILE * fstream;
+    fstream = fopen(fileName, "r");
+    if(fstream == NULL)
     {
         printf("Unable open the file.\n");
         exit(EXIT_FAILURE);
     }
-    fscanf(matrixFile, "%d", &n);
+    fscanf(fstream, "%d", &n);
 
     double** A = createCoefficientMatrix(n);
 
     for(int i = 0; i < n; i++){
         for (int j = 0; j < n; j++){
-            fscanf(matrixFile, "%lf", &A[i][j]);
+            fscanf(fstream, "%lf", &A[i][j]);
         }
     }
 
     double* B = (double *) malloc(n * sizeof(double));
     for(int i = 0; i < n; i++){
-        fscanf(matrixFile, "%lf", &B[i]);
+        fscanf(fstream, "%lf", &B[i]);
     }
 
-    fclose(matrixFile);
+    fclose(fstream);
 
     matrix = allocateMatrix(matrix, n);
     matrix->n = n;

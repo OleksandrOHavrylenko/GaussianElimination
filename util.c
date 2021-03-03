@@ -41,8 +41,9 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
         printf("\nUnable open the file. Please enter enter other file \n");
         return NULL;
     }
-    int n = getMatrixSize(fileInputStream);
-    if (n < 0) {
+    int error_code = 0;
+    int n = getMatrixSize(fileInputStream, &error_code);
+    if (error_code) {
         return NULL;
     }
     double** A = initMatrixAFromFile(fileInputStream, n);
@@ -79,13 +80,19 @@ double** initMatrixAFromFile(FILE * fileInputStream, int n) {
 
     double** A = createCoefficientMatrix(n);
 
+    int error_code = 0;
     while (i < n && (line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
         line[strcspn(line, "\r\n")] = 0;
         record = strtok(line, ",");
-        while (record != NULL) {
-            int error_code = 0;
-            double value = getDoubleFromFile(record, i, j, &error_code);
-            if (error_code != 0) {
+        while (record != NULL && !error_code) {
+            if (j > n-1) {
+                printf("Incorrect file in line: %d\n", i+1);
+                error_code = -1;
+                return NULL;
+            }
+            double value = getDoubleFromFile(record, &error_code);
+            if (error_code) {
+                printf("\nNot a number at line: %d, position: %d \n", i+1, j+1);
                 return NULL;
             }
             A[i][j++] = value;
@@ -108,13 +115,19 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
 
     double* B = (double *) malloc(n * sizeof(double));
 
+    int error_code = 0;
     while ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
         line[strcspn(line, "\r\n")] = 0;
         record = strtok(line, ",");
-        while (record != NULL) {
-            int error_code = 0;
-            double value = getDoubleFromFile(record, j, j, &error_code);
-            if (error_code != 0) {
+        while (record != NULL && !error_code) {
+            if (j > n-1) {
+                printf("Incorrect file in line: %d\n", i+1);
+                error_code = -1;
+                return NULL;
+            }
+            double value = getDoubleFromFile(record, &error_code);
+            if (error_code) {
+                printf("\nNot a number at line: %d, position: %d \n", i+1, j+1);
                 return NULL;
             }
             B[j++] = value;
@@ -130,9 +143,7 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
     return B;
 }
 
-
-
-int getMatrixSize(FILE * fileInputStream) {
+int getMatrixSize(FILE * fileInputStream, int* error_code) {
     char buffer[BUFF];
     char *record = NULL, *line = NULL;
     int pos = 0;
@@ -140,12 +151,13 @@ int getMatrixSize(FILE * fileInputStream) {
     if ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
         line[strcspn(line, "\r\n")] = 0;
         record = strtok(line, ",");
-        while (record != NULL) {
+        while (record != NULL && !*error_code) {
             if (pos > 0) {
                 printf("Incorrect file in line: 1\n");
-                return -1;
+                *error_code = -1;
+                return n;
             }
-            n = getIntFromFile(line);
+            n = getIntFromFile(line, error_code);
             record = strtok(NULL, ",");
             pos++;
         }
@@ -204,7 +216,7 @@ int getInt(char* message) {
     return value;
 }
 
-int getIntFromFile(char* input) {
+int getIntFromFile(char* input, int* error_code) {
     char *endPtr = NULL;
     errno = 0;
     long value = strtol(input, &endPtr, 10);
@@ -215,17 +227,17 @@ int getIntFromFile(char* input) {
         } else {
             printf("Not a integer\n");
         }
-        return -1;
+        *error_code = -1;
+        return value;
     }
     return value;
 }
 
-double getDoubleFromFile(char* input, int line, int position, int* error_code) {
+double getDoubleFromFile(char* input, int* error_code) {
     char *endPtr = NULL;
     errno = 0;
     double value = strtod(input, &endPtr);
     if (errno || *endPtr != '\0' || input == endPtr) {
-        printf("\nNot a number at line: %d, position: %d \n", line+2, position+1);
         *error_code = -1;
         return value;
     }

@@ -14,7 +14,7 @@ double** initMatrixAFromFile(FILE * fileInputStream, int n);
 
 double* initMatrixBFromFile(FILE * fileInputStream, int n);
 
-int getMatrixSize(FILE * fileInputStream);
+int getMatrixSize(FILE * fileInputStream, int* error_code);
 
 double** createCoefficientMatrix(int);
 
@@ -24,9 +24,9 @@ void initMatrixBFromConsole(Matrix* matrix);
 
 int getInt(char* message);
 
-int getIntFromFile(char* input);
+int getIntFromFile(char* input, int* error_code);
 
-double getDoubleFromFile(char* input, int line, int position, int* error_code);
+double getDoubleFromFile(char* input, int* error_code);
 
 double getDouble(char* message);
 

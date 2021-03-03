@@ -111,10 +111,10 @@ int isZeroRow(const Matrix* matrix, int row) {
 
 void freeMemory(Matrix* matrix) {
     for (int i = 0; i < matrix->n; i++) {
-        free(matrix->A[i]);
+        if (matrix->A[i]) free(matrix->A[i]);
     }
 
-    free(matrix->A);
-    free(matrix->B);
-    free(matrix->X);
+    if (matrix->A) free(matrix->A);
+    if (matrix->B) free(matrix->B);
+    if (matrix->X) free(matrix->X);
 }

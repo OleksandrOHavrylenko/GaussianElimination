@@ -6,6 +6,10 @@
 #include "util.h"
 
 void solver(Matrix* matrix) {
+    if (matrix == NULL) {
+        printf("Matrix is not initialized.\n");
+        return;
+    }
     int singularFlag = forwardElimination(matrix);
 
     if(singularFlag != -1) {

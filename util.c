@@ -34,30 +34,30 @@ Matrix* allocateMatrix(Matrix* matrix, int n) {
 }
 
 Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
-    int n;
-    FILE * fstream;
-    fstream = fopen(fileName, "r");
-    if(fstream == NULL)
+    FILE * fileInputStream;
+    fileInputStream = fopen(fileName, "r");
+    if(fileInputStream == NULL)
     {
-        printf("Unable open the file.\n");
-        exit(EXIT_FAILURE);
+        printf("\nUnable open the file. Please enter enter other file \n");
+        return NULL;
     }
-    fscanf(fstream, "%d", &n);
-
-    double** A = createCoefficientMatrix(n);
-
-    for(int i = 0; i < n; i++){
-        for (int j = 0; j < n; j++){
-            fscanf(fstream, "%lf", &A[i][j]);
-        }
+    int n = getMatrixSize(fileInputStream);
+    if (n < 0) {
+        return NULL;
     }
+    double** A = initMatrixAFromFile(fileInputStream, n);
 
-    double* B = (double *) malloc(n * sizeof(double));
-    for(int i = 0; i < n; i++){
-        fscanf(fstream, "%lf", &B[i]);
+    if (A == NULL) {
+        return NULL;
     }
 
-    fclose(fstream);
+    printf("Initialization of Matrix B\n");
+    double* B = initMatrixBFromFile(fileInputStream, n);
+    if (B == NULL) {
+        return NULL;
+    }
+
+    fclose(fileInputStream);
 
     matrix = allocateMatrix(matrix, n);
     matrix->n = n;
@@ -71,6 +71,87 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     printMatrices(matrix);
 
     return matrix;
+}
+
+double** initMatrixAFromFile(FILE * fileInputStream, int n) {
+    char buffer[1024];
+    char *record, *line;
+    int i = 0, j = 0;
+
+    double** A = createCoefficientMatrix(n);
+
+    while (i < n && (line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
+        line[strcspn(line, "\r\n")] = 0;
+        record = strtok(line, ",");
+        while (record != NULL) {
+            int error_code = 0;
+            double value = getDoubleFromFile(record, i, j, &error_code);
+            if (error_code != 0) {
+                return NULL;
+            }
+            A[i][j++] = value;
+            record = strtok(NULL, ",");
+        }
+        if (j != n) {
+            printf("Incorrect file in line: %d\n" , i+2);
+            return NULL;
+        }
+        i++;
+        j=0;
+    }
+    return A;
+}
+
+double* initMatrixBFromFile(FILE * fileInputStream, int n) {
+    char buffer[1024];
+    char *record, *line;
+    int i = n, j = 0;
+
+    double* B = (double *) malloc(n * sizeof(double));
+
+    while ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
+        line[strcspn(line, "\r\n")] = 0;
+        record = strtok(line, ",");
+        while (record != NULL) {
+            int error_code = 0;
+            double value = getDoubleFromFile(record, j, j, &error_code);
+            if (error_code != 0) {
+                return NULL;
+            }
+            B[j++] = value;
+            record = strtok(NULL, ",");
+        }
+        if (j != n) {
+            printf("Incorrect file in line: %d\n" , i+2);
+            return NULL;
+        }
+        i++;
+        j = 0;
+    }
+    return B;
+}
+
+
+
+int getMatrixSize(FILE * fileInputStream) {
+    char buffer[1024];
+    char *record, *line;
+    int pos = 0;
+    int n = -1;
+    if ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
+        line[strcspn(line, "\r\n")] = 0;
+        record = strtok(line, ",");
+        while (record != NULL) {
+            if (pos > 0) {
+                printf("Incorrect file in line: 1\n");
+                return -1;
+            }
+            n = getIntFromFile(line);
+            record = strtok(NULL, ",");
+            pos++;
+        }
+    }
+    return n;
 }
 
 double** createCoefficientMatrix(int n) {
@@ -121,6 +202,36 @@ int getInt(char* message) {
         l = strtol(input, &endptr, 10);
     }
     free(input);
+    return l;
+}
+
+int getIntFromFile(char* input) {
+    char *endptr;
+    errno = 0;
+    long l = strtol(input, &endptr, 10);
+    while (errno || *endptr != '\0' || input == endptr || l < 1 || l > INT_MAX) {
+        printf("Incorrect file in line: 1\n");
+        if(l < 1) {
+            printf("The number should be a positive integer\n");
+        } else {
+            printf("Not a integer\n");
+        }
+        return -1;
+    }
+    return l;
+}
+
+double getDoubleFromFile(char* input, int line, int position, int* error_code) {
+//    char* input = input_string();
+    char *endptr;
+    errno = 0;
+    double l = strtod(input, &endptr);
+    if (errno || *endptr != '\0' || input == endptr) {
+        printf("\nNot a number at line: %d, position: %d \n", line++, position);
+//        printf("%s", message);
+        *error_code = -1;
+        return l;
+    }
     return l;
 }
 

@@ -9,10 +9,10 @@
 Matrix* initMatrixFromConsole(Matrix* matrix) {
     int n = 0;
     char *message = (char*)malloc(45 * sizeof(char));
-    sprintf(message,"Enter the number of unknown variables : ");
+    sprintf(message,"\n\n\tEnter the number of unknown variables : ");
     printf("%s", message);
     n = getInt(message);
-    printf("The general view of the system of linear equations with %d variables : \n", n);
+    printf("\n\tThe general view of the system of linear equations with %d variables : \n", n);
     printCommonView(n);
 
     matrix = allocateMatrix(matrix, n);
@@ -20,7 +20,7 @@ Matrix* initMatrixFromConsole(Matrix* matrix) {
     initMatrixAFromConsole(matrix);
     initMatrixBFromConsole(matrix);
 
-    printf("\nThe starting view of the system of linear equations:");
+    printf("\n\tThe starting view of the system of linear equations:");
     printMatrices(matrix);
     return matrix;
 }
@@ -38,7 +38,7 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     fileInputStream = fopen(fileName, "r");
     if(fileInputStream == NULL)
     {
-        printf("\nUnable open the file. Please enter enter other file \n");
+        printf("\n\tUnable open the file. Please enter enter other file \n");
         return NULL;
     }
     int error_code = 0;
@@ -64,10 +64,10 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     matrix->A = A;
     matrix->B = B;
 
-    printf("The general view of the system of linear equations with %d variables : \n", matrix->n);
+    printf("\n\n\tThe general view of the system of linear equations with %d variables : \n", matrix->n);
     printCommonView(matrix->n);
 
-    printf("\nThe starting view of the system of linear equations:");
+    printf("\n\tThe starting view of the system of linear equations:");
     printMatrices(matrix);
 
     return matrix;
@@ -86,20 +86,20 @@ double** initMatrixAFromFile(FILE * fileInputStream, int n) {
         record = strtok(line, ",");
         while (record != NULL && !error_code) {
             if (j > n-1) {
-                printf("Incorrect file in line: %d\n", i+1);
+                printf("\n\tIncorrect file in line: %d\n", i+1);
                 error_code = -1;
                 return NULL;
             }
             double value = getDoubleFromFile(record, &error_code);
             if (error_code) {
-                printf("\nNot a number at line: %d, position: %d \n", i+1, j+1);
+                printf("\n\tNot a number at line: %d, position: %d \n", i+1, j+1);
                 return NULL;
             }
             A[i][j++] = value;
             record = strtok(NULL, ",");
         }
         if (j != n) {
-            printf("Incorrect file in line: %d\n" , i+2);
+            printf("\tIncorrect file in line: %d\n" , i+2);
             return NULL;
         }
         i++;
@@ -121,20 +121,20 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
         record = strtok(line, ",");
         while (record != NULL && !error_code) {
             if (j > n-1) {
-                printf("Incorrect file in line: %d\n", i+1);
+                printf("\tIncorrect file in line: %d\n", i+1);
                 error_code = -1;
                 return NULL;
             }
             double value = getDoubleFromFile(record, &error_code);
             if (error_code) {
-                printf("\nNot a number at line: %d, position: %d \n", i+1, j+1);
+                printf("\n\tNot a number at line: %d, position: %d \n", i+1, j+1);
                 return NULL;
             }
             B[j++] = value;
             record = strtok(NULL, ",");
         }
         if (j != n) {
-            printf("Incorrect file in line: %d\n" , i+2);
+            printf("\tIncorrect file in line: %d\n" , i+2);
             return NULL;
         }
         i++;
@@ -153,7 +153,7 @@ int getMatrixSize(FILE * fileInputStream, int* error_code) {
         record = strtok(line, ",");
         while (record != NULL && !*error_code) {
             if (pos > 0) {
-                printf("Incorrect file in line: 1\n");
+                printf("\tIncorrect file in line: 1\n");
                 *error_code = -1;
                 return n;
             }
@@ -174,26 +174,28 @@ double** createCoefficientMatrix(int n) {
 }
 
 void initMatrixAFromConsole(Matrix* matrix) {
-    printf("\nEnter the elements of Matrix A : \n");
+    printf("\n\tEnter the elements of Matrix A : \n");
+    char *message = (char*)malloc(10 * sizeof(char));
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
-            char *message = (char*)malloc(10 * sizeof(char));
-            sprintf(message,"A[%d][%d] =%s", i+1, j+1, " ");
+            sprintf(message,"\tA[%d][%d] =%s", i+1, j+1, " ");
             printf("%s", message);
             matrix->A[i][j] = getDouble(message);
         }
     }
+    if (message) free(message);
 }
 
 void initMatrixBFromConsole(Matrix* matrix) {
-    printf("\n Enter the elements of Matrix B : \n");
+    printf("\n\tEnter the elements of Matrix B : \n");
     printf("\n");
+    char *message = (char*)malloc(10 * sizeof(char));
     for (int i = 0; i < matrix->n; i++) {
-        char *message = (char*)malloc(10 * sizeof(char));
-        sprintf(message,"B[%d] = ", i+1);
+        sprintf(message,"\tB[%d] = ", i+1);
         printf("%s", message);
         matrix->B[i] = getDouble(message);
     }
+    if (message) free(message);
 }
 
 int getInt(char* message) {
@@ -221,11 +223,11 @@ int getIntFromFile(char* input, int* error_code) {
     errno = 0;
     long value = strtol(input, &endPtr, 10);
     while (errno || *endPtr != '\0' || input == endPtr || value < 1 || value > INT_MAX) {
-        printf("Incorrect file in line: 1\n");
+        printf("\tIncorrect file in line: 1\n");
         if(value < 1) {
-            printf("The number should be a positive integer\n");
+            printf("\tThe number should be a positive integer\n");
         } else {
-            printf("Not a integer\n");
+            printf("\tNot a integer\n");
         }
         *error_code = -1;
         return value;
@@ -250,7 +252,7 @@ double getDouble(char* message) {
     errno = 0;
     double value = strtod(input, &endPtr);
     while (errno || *endPtr != '\0' || input == endPtr || value < INT_MIN || value > INT_MAX) {
-        printf("Not a number, please try again\n");
+        printf("\tNot a number, please try again\n");
         printf("%s", message);
         if (input) free(input);
         input = input_string();
@@ -278,9 +280,12 @@ char * input_string()
 }
 
 void printCommonView(int size) {
-    printf("===============================\n");
+    printf("\t====================================================================\n");
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
+            if(!j) {
+                printf("\t");
+            }
             if (j == size - 1) {
                 printf("A[%d][%d]*x[%d]%s", i+1, j+1, j+1, " ");
             } else {
@@ -289,32 +294,32 @@ void printCommonView(int size) {
         }
         printf("= B[%d]\n", i+1);
     }
-    printf("===============================\n");
+    printf("\t====================================================================\n");
 }
 
 void printMatrices(const Matrix* matrix) {
-    printf("\n======================================\n");
+    printf("\n\t======================================\n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
             if (j == 0) {
-                printf("%2s", "|");
+                printf("\t%2s", "|");
             }
             printf("%7.2f ", matrix->A[i][j]);
             if (j == matrix->n - 1) {
                 printf("%s", "|");
             }
         }
-        printf("%8s", "|");
+        printf("\t%8s", "|");
         printf("%7.2f", matrix->B[i]);
         printf("%s\n", "|");
     }
-    printf("======================================\n");
+    printf("\t======================================\n");
 }
 
 void printResult(const Matrix* matrix) {
-    printf("\n======================================\n");
+    printf("\n\t======================================\n");
     for (int i = 0; i < matrix->n; i++) {
-        printf("X[%d] = %5.2f;\n", i+1, matrix->X[i]);
+        printf("\n\tX[%d] = %5.2f;\n", i+1, matrix->X[i]);
     }
 }
 

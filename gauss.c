@@ -7,26 +7,26 @@
 
 void solver(Matrix* matrix) {
     if (matrix == NULL) {
-        printf("Matrix is not initialized.\n");
+        printf("\tMatrix is not initialized.\n");
         return;
     }
     int singularFlag = forwardElimination(matrix);
 
     if(singularFlag != -1) {
-        printf("The Matrix is Singular.\n");
+        printf("\tThe Matrix is Singular.\n");
 
         if (matrix->B[singularFlag] > ZERO)
-            printf("Inconsistent System.");
+            printf("\tInconsistent System.");
         else
-            printf("May have infinitely many solutions.");
+            printf("\tMay have infinitely many solutions.");
         return;
     }
 
     backSubstitution(matrix);
 
-    printf("\nThe Gaussian forward stroke:");
+    printf("\n\tThe Gaussian forward stroke:");
     printMatrices(matrix);
-    printf("\nThe result of the Gaussian Elimination is:");
+    printf("\n\tThe result of the Gaussian Elimination is:");
     printResult(matrix);
 }
 
@@ -66,7 +66,7 @@ int forwardElimination(Matrix* matrix) {
 
                 matrix->A[i][column] = 0;
             }
-            printf("\nStep %d", column + 1);
+            printf("\n\tStep %d", column + 1);
 
             printMatrices(matrix);
             nextRow++;
@@ -87,7 +87,7 @@ void backSubstitution(Matrix* matrix) {
 }
 
 void swapRow(Matrix* matrix, int row1, int row2) {
-    printf("Swapped rows %d and %d\n", row1+1, row2+1);
+    printf("\tSwapped rows %d and %d\n", row1+1, row2+1);
 
     for (int k = 0; k < matrix->n; ++k) {
         double temp = matrix->A[row1][k];

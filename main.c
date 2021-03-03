@@ -38,7 +38,7 @@ void menu(Matrix* matrix) {
                 break;
             case '2':
                 printf("\n\nYou selected Solve Linear equation input from file\n");
-                solver(initMatrixFromFile(matrix, "matrix.txt"));
+                solver(initMatrixFromFile(matrix, "matrix.csv"));
                 break;
             case '0':
                 printf("\n\nYou selected exit\n");

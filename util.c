@@ -17,8 +17,8 @@ Matrix* initMatrixFromConsole(Matrix* matrix) {
 
     matrix = allocateMatrix(matrix, n);
 
-    initMatrixA(matrix);
-    initMatrixB(matrix);
+    initMatrixAFromConsole(matrix);
+    initMatrixBFromConsole(matrix);
 
     printf("\nThe starting view of the system of linear equations:");
     printMatrices(matrix);
@@ -51,7 +51,6 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
         return NULL;
     }
 
-    printf("Initialization of Matrix B\n");
     double* B = initMatrixBFromFile(fileInputStream, n);
     if (B == NULL) {
         return NULL;
@@ -74,8 +73,8 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
 }
 
 double** initMatrixAFromFile(FILE * fileInputStream, int n) {
-    char buffer[1024];
-    char *record, *line;
+    char buffer[BUFF];
+    char *record = NULL, *line = NULL;
     int i = 0, j = 0;
 
     double** A = createCoefficientMatrix(n);
@@ -103,8 +102,8 @@ double** initMatrixAFromFile(FILE * fileInputStream, int n) {
 }
 
 double* initMatrixBFromFile(FILE * fileInputStream, int n) {
-    char buffer[1024];
-    char *record, *line;
+    char buffer[BUFF];
+    char *record = NULL, *line = NULL;
     int i = n, j = 0;
 
     double* B = (double *) malloc(n * sizeof(double));
@@ -134,8 +133,8 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
 
 
 int getMatrixSize(FILE * fileInputStream) {
-    char buffer[1024];
-    char *record, *line;
+    char buffer[BUFF];
+    char *record = NULL, *line = NULL;
     int pos = 0;
     int n = -1;
     if ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
@@ -162,7 +161,7 @@ double** createCoefficientMatrix(int n) {
     return A;
 }
 
-void initMatrixA(Matrix* matrix) {
+void initMatrixAFromConsole(Matrix* matrix) {
     printf("\nEnter the elements of Matrix A : \n");
     for (int i = 0; i < matrix->n; i++) {
         for (int j = 0; j < matrix->n; j++) {
@@ -174,7 +173,7 @@ void initMatrixA(Matrix* matrix) {
     }
 }
 
-void initMatrixB(Matrix* matrix) {
+void initMatrixBFromConsole(Matrix* matrix) {
     printf("\n Enter the elements of Matrix B : \n");
     printf("\n");
     for (int i = 0; i < matrix->n; i++) {
@@ -187,68 +186,66 @@ void initMatrixB(Matrix* matrix) {
 
 int getInt(char* message) {
     char* input = input_string();
-    char *endptr;
+    char *endPtr = NULL;
     errno = 0;
-    long l = strtol(input, &endptr, 10);
-    while (errno || *endptr != '\0' || input == endptr || l < 1 || l > INT_MAX) {
-        if(l < 1) {
+    long value = strtol(input, &endPtr, 10);
+    while (errno || *endPtr != '\0' || input == endPtr || value < 1 || value > INT_MAX) {
+        if(value < 1) {
             printf("The number should be a positive integer\n");
         } else {
             printf("Not a integer, please try again\n");
         }
         printf("%s", message);
-        free(input);
+        if (input) free(input);
         input = input_string();
-        l = strtol(input, &endptr, 10);
+        value = strtol(input, &endPtr, 10);
     }
-    free(input);
-    return l;
+    if (input) free(input);
+    return value;
 }
 
 int getIntFromFile(char* input) {
-    char *endptr;
+    char *endPtr = NULL;
     errno = 0;
-    long l = strtol(input, &endptr, 10);
-    while (errno || *endptr != '\0' || input == endptr || l < 1 || l > INT_MAX) {
+    long value = strtol(input, &endPtr, 10);
+    while (errno || *endPtr != '\0' || input == endPtr || value < 1 || value > INT_MAX) {
         printf("Incorrect file in line: 1\n");
-        if(l < 1) {
+        if(value < 1) {
             printf("The number should be a positive integer\n");
         } else {
             printf("Not a integer\n");
         }
         return -1;
     }
-    return l;
+    return value;
 }
 
 double getDoubleFromFile(char* input, int line, int position, int* error_code) {
-//    char* input = input_string();
-    char *endptr;
+    char *endPtr = NULL;
     errno = 0;
-    double l = strtod(input, &endptr);
-    if (errno || *endptr != '\0' || input == endptr) {
-        printf("\nNot a number at line: %d, position: %d \n", line++, position);
-//        printf("%s", message);
+    double value = strtod(input, &endPtr);
+    if (errno || *endPtr != '\0' || input == endPtr) {
+        printf("\nNot a number at line: %d, position: %d \n", line+2, position+1);
         *error_code = -1;
-        return l;
+        return value;
     }
-    return l;
+    return value;
 }
 
 double getDouble(char* message) {
     char* input = input_string();
-    char *endptr;
+    char *endPtr;
     errno = 0;
-    double l = strtod(input, &endptr);
-    while (errno || *endptr != '\0' || input == endptr || l < INT_MIN || l > INT_MAX) {
+    double value = strtod(input, &endPtr);
+    while (errno || *endPtr != '\0' || input == endPtr || value < INT_MIN || value > INT_MAX) {
         printf("Not a number, please try again\n");
         printf("%s", message);
-        free(input);
+        if (input) free(input);
         input = input_string();
-        l = strtod(input, &endptr);
+        value = strtod(input, &endPtr);
     }
-    free(input);
-    return l;
+    if (input) free(input);
+    return value;
 }
 
 char * input_string()
@@ -259,11 +256,13 @@ char * input_string()
     {
         buff[strcspn(buff, "\n")] = 0;
         input = (char *) malloc(strlen(buff)+1);
-        if (!input) exit(1);
+        if (!input) {
+            return NULL;
+        }
         strcpy(input, buff);
         return input;
     }
-    return "Invalid input";
+    return NULL;
 }
 
 void printCommonView(int size) {

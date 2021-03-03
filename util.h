@@ -18,9 +18,9 @@ int getMatrixSize(FILE * fileInputStream);
 
 double** createCoefficientMatrix(int);
 
-void initMatrixA(Matrix* matrix);
+void initMatrixAFromConsole(Matrix* matrix);
 
-void initMatrixB(Matrix* matrix);
+void initMatrixBFromConsole(Matrix* matrix);
 
 int getInt(char* message);
 

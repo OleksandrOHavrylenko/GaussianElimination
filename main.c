@@ -26,31 +26,31 @@ void menu(Matrix* matrix) {
         system("cls");
         printf("\n\tMENU for Gaussian Elimination");
         printf("\n\t------------------------------");
-        printf("\n\n\t 1. Solve Linear equation input from console");
-        printf("\n\t 2. Solve Linear equation input  matrix.csv file");
-        printf("\n\t 3. Solve Linear equation input from file");
+        printf("\n\n\t 1. Solve Linear equations. Input matrices from console.");
+        printf("\n\t 2. Solve Linear equations. Input matrices from matrix.csv file.");
+        printf("\n\t 3. Solve Linear equations. Input matrices from your file.");
         printf("\n\t 0. EXIT");
         printf("\n\n\t Enter Your Choice: ");
         choice = getche();
         switch (choice) {
             case '1':
-                printf("\n\n\tYou selected Solve Linear equation input from console\n");
+                printf("\n\n\tYour choice is to input matrices from console\n");
                 solver(initMatrixFromConsole(matrix));
                 break;
             case '2':
-                printf("\n\n\tYou selected Solve Linear equation input matrix.csv file\n");
+                printf("\n\n\tYour choice is to input matrices from matrix.csv file\n");
                 solver(initMatrixFromFile(matrix, "matrix.csv"));
                 break;
             case '3':
-                printf("\n\n\tYou selected Solve Linear equation input from file\n");
+                printf("\n\n\tYour choice is to input matrices from your file\n");
                 printf("\n\n\tInput the file name, please: ");
                 solver(initMatrixFromFile(matrix, input_string()));
                 break;
             case '0':
-                printf("\n\n\tYou selected exit\n");
+                printf("\n\n\tYour choice is to exit\n");
                 break;
             default:
-                printf("\n\n\tINVALID SELECTION...Please try again\n");
+                printf("\n\n\tERROR...Invalid selection...Please try again\n");
         }
         (void) getch();
     }

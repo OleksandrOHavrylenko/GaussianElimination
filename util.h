@@ -4,31 +4,31 @@
 #include "gauss.h"
 #define BUFF 100
 
-Matrix* allocateMatrix(Matrix* matrix, int n);
-
 Matrix* initMatrixFromConsole(Matrix* matrix);
 
 Matrix* initMatrixFromFile(Matrix* matrix, char *fileName);
 
-double** initMatrixAFromFile(FILE * fileInputStream, int n);
-
-double* initMatrixBFromFile(FILE * fileInputStream, int n);
-
-int getMatrixSize(FILE * fileInputStream, int* error_code);
-
-double** createCoefficientMatrix(int);
+Matrix* allocateMatrix(Matrix* matrix, int n);
 
 void initMatrixAFromConsole(Matrix* matrix);
 
 void initMatrixBFromConsole(Matrix* matrix);
 
-int getInt(char* message);
+int getMatrixSize(FILE * fileInputStream, int* error_code);
+
+double** initMatrixAFromFile(FILE * fileInputStream, int n);
+
+double* initMatrixBFromFile(FILE * fileInputStream, int n);
+
+double** createCoefficientMatrix(int);
+
+int getIntFromConsole(char* message);
 
 int getIntFromFile(char* input, int* error_code);
 
 double getDoubleFromFile(char* input, int* error_code);
 
-double getDouble(char* message);
+double getDoubleConsole(char* message);
 
 char * input_string();
 

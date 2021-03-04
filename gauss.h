@@ -14,7 +14,9 @@ void solver(Matrix* matrix);
 
 int forwardElimination(Matrix* matrix);
 
-void backSubstitution(Matrix* matrix);
+int backSubstitution(Matrix* matrix);
+
+int isSingular(int singularFlag, Matrix* matrix);
 
 void swapRow(Matrix* matrix, int row1, int row2);
 

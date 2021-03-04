@@ -12,17 +12,14 @@ void solver(Matrix* matrix) {
     }
     int singularFlag = forwardElimination(matrix);
 
-    if(singularFlag != -1) {
-        printf("\tThe Matrix is Singular.\n");
-
-        if (matrix->B[singularFlag] > ZERO)
-            printf("\tInconsistent System.");
-        else
-            printf("\tMay have infinitely many solutions.");
+    if(isSingular(singularFlag, matrix)) {
         return;
     }
 
-    backSubstitution(matrix);
+    singularFlag = backSubstitution(matrix);
+    if (isSingular(singularFlag, matrix)) {
+        return;
+    }
 
     printf("\n\tThe Gaussian forward stroke:");
     printMatrices(matrix);
@@ -32,7 +29,8 @@ void solver(Matrix* matrix) {
 
 int forwardElimination(Matrix* matrix) {
     int nextRow = 0;
-    for (int column = 0; column < matrix->n; column++) {
+//    changed to matrix->n-1 for not to show last step
+    for (int column = 0; column < matrix->n-1; column++) {
         int maxRow = column;
         double maxValue = matrix->A[maxRow][column];
 
@@ -48,6 +46,8 @@ int forwardElimination(Matrix* matrix) {
                 return column;
             }
         } else {
+            printf("\n\n\tStep %d", column + 1);
+
             if(maxRow != column) {
                 swapRow(matrix, nextRow, maxRow);
             }
@@ -66,8 +66,6 @@ int forwardElimination(Matrix* matrix) {
 
                 matrix->A[i][column] = 0;
             }
-            printf("\n\tStep %d", column + 1);
-
             printMatrices(matrix);
             nextRow++;
         }
@@ -75,8 +73,11 @@ int forwardElimination(Matrix* matrix) {
     return -1;
 }
 
-void backSubstitution(Matrix* matrix) {
+int backSubstitution(Matrix* matrix) {
     for (int i = matrix->n - 1; i >= 0; i--) {
+        if (isZeroRow(matrix, i)) {
+            return i;
+        }
         matrix->X[i] = matrix->B[i];
         for (int j=i+1; j<matrix->n; j++)
         {
@@ -84,6 +85,21 @@ void backSubstitution(Matrix* matrix) {
         }
         matrix->X[i] = matrix->X[i] / matrix->A[i][i];
     }
+    return -1;
+}
+
+int isSingular(int singularFlag, Matrix* matrix) {
+    if (singularFlag == -1) {
+        return 0;
+    }
+    printf("\tThe Matrix is Singular.\n");
+
+    if (matrix->B[singularFlag] > ZERO){
+        printf("\tInconsistent System.");
+    } else {
+        printf("\tMay have infinitely many solutions.");
+    }
+    return 1;
 }
 
 void swapRow(Matrix* matrix, int row1, int row2) {

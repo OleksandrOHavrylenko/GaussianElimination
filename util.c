@@ -11,7 +11,7 @@ Matrix* initMatrixFromConsole(Matrix* matrix) {
     char *message = (char*)malloc(45 * sizeof(char));
     sprintf(message,"\n\n\tEnter the number of unknown variables : ");
     printf("%s", message);
-    n = getInt(message);
+    n = getIntFromConsole(message);
     printf("\n\tThe general view of the system of linear equations with %d variables : \n", n);
     printCommonView(n);
 
@@ -22,14 +22,6 @@ Matrix* initMatrixFromConsole(Matrix* matrix) {
 
     printf("\n\tThe starting view of the system of linear equations:");
     printMatrices(matrix);
-    return matrix;
-}
-
-Matrix* allocateMatrix(Matrix* matrix, int n) {
-    matrix->A = createCoefficientMatrix(n);
-    matrix->B = (double *) malloc(n * sizeof(double));
-    matrix->X = (double *) malloc(n * sizeof(double));
-    matrix->n = n;
     return matrix;
 }
 
@@ -71,6 +63,61 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     printMatrices(matrix);
 
     return matrix;
+}
+
+Matrix* allocateMatrix(Matrix* matrix, int n) {
+    matrix->A = createCoefficientMatrix(n);
+    matrix->B = (double *) malloc(n * sizeof(double));
+    matrix->X = (double *) malloc(n * sizeof(double));
+    matrix->n = n;
+    return matrix;
+}
+
+void initMatrixAFromConsole(Matrix* matrix) {
+    printf("\n\tEnter the elements of Matrix A : \n");
+    char *message = (char*)malloc(10 * sizeof(char));
+    for (int i = 0; i < matrix->n; i++) {
+        for (int j = 0; j < matrix->n; j++) {
+            sprintf(message,"\tA[%d][%d] =%s", i+1, j+1, " ");
+            printf("%s", message);
+            matrix->A[i][j] = getDoubleConsole(message);
+        }
+    }
+    if (message) free(message);
+}
+
+void initMatrixBFromConsole(Matrix* matrix) {
+    printf("\n\tEnter the elements of Matrix B : \n");
+    printf("\n");
+    char *message = (char*)malloc(10 * sizeof(char));
+    for (int i = 0; i < matrix->n; i++) {
+        sprintf(message,"\tB[%d] = ", i+1);
+        printf("%s", message);
+        matrix->B[i] = getDoubleConsole(message);
+    }
+    if (message) free(message);
+}
+
+int getMatrixSize(FILE * fileInputStream, int* error_code) {
+    char buffer[BUFF];
+    char *record = NULL, *line = NULL;
+    int pos = 0;
+    int n = -1;
+    if ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
+        line[strcspn(line, "\r\n")] = 0;
+        record = strtok(line, ",");
+        while (record != NULL && !*error_code) {
+            if (pos > 0) {
+                printf("\tIncorrect file in line: 1\n");
+                *error_code = -1;
+                return n;
+            }
+            n = getIntFromFile(line, error_code);
+            record = strtok(NULL, ",");
+            pos++;
+        }
+    }
+    return n;
 }
 
 double** initMatrixAFromFile(FILE * fileInputStream, int n) {
@@ -143,28 +190,6 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
     return B;
 }
 
-int getMatrixSize(FILE * fileInputStream, int* error_code) {
-    char buffer[BUFF];
-    char *record = NULL, *line = NULL;
-    int pos = 0;
-    int n = -1;
-    if ((line = fgets(buffer, sizeof(buffer), fileInputStream)) != NULL) {
-        line[strcspn(line, "\r\n")] = 0;
-        record = strtok(line, ",");
-        while (record != NULL && !*error_code) {
-            if (pos > 0) {
-                printf("\tIncorrect file in line: 1\n");
-                *error_code = -1;
-                return n;
-            }
-            n = getIntFromFile(line, error_code);
-            record = strtok(NULL, ",");
-            pos++;
-        }
-    }
-    return n;
-}
-
 double** createCoefficientMatrix(int n) {
     double **A = (double **) malloc(n * sizeof(double *));
     for (int i = 0; i < n; i++) {
@@ -173,41 +198,16 @@ double** createCoefficientMatrix(int n) {
     return A;
 }
 
-void initMatrixAFromConsole(Matrix* matrix) {
-    printf("\n\tEnter the elements of Matrix A : \n");
-    char *message = (char*)malloc(10 * sizeof(char));
-    for (int i = 0; i < matrix->n; i++) {
-        for (int j = 0; j < matrix->n; j++) {
-            sprintf(message,"\tA[%d][%d] =%s", i+1, j+1, " ");
-            printf("%s", message);
-            matrix->A[i][j] = getDouble(message);
-        }
-    }
-    if (message) free(message);
-}
-
-void initMatrixBFromConsole(Matrix* matrix) {
-    printf("\n\tEnter the elements of Matrix B : \n");
-    printf("\n");
-    char *message = (char*)malloc(10 * sizeof(char));
-    for (int i = 0; i < matrix->n; i++) {
-        sprintf(message,"\tB[%d] = ", i+1);
-        printf("%s", message);
-        matrix->B[i] = getDouble(message);
-    }
-    if (message) free(message);
-}
-
-int getInt(char* message) {
+int getIntFromConsole(char* message) {
     char* input = input_string();
     char *endPtr = NULL;
     errno = 0;
     long value = strtol(input, &endPtr, 10);
     while (errno || *endPtr != '\0' || input == endPtr || value < 1 || value > INT_MAX) {
         if(value < 1) {
-            printf("The number should be a positive integer\n");
+            printf("\tThe number should be a positive integer\n");
         } else {
-            printf("Not a integer, please try again\n");
+            printf("\tNot a integer, please try again\n");
         }
         printf("%s", message);
         if (input) free(input);
@@ -235,18 +235,7 @@ int getIntFromFile(char* input, int* error_code) {
     return value;
 }
 
-double getDoubleFromFile(char* input, int* error_code) {
-    char *endPtr = NULL;
-    errno = 0;
-    double value = strtod(input, &endPtr);
-    if (errno || *endPtr != '\0' || input == endPtr) {
-        *error_code = -1;
-        return value;
-    }
-    return value;
-}
-
-double getDouble(char* message) {
+double getDoubleConsole(char* message) {
     char* input = input_string();
     char *endPtr;
     errno = 0;
@@ -259,6 +248,17 @@ double getDouble(char* message) {
         value = strtod(input, &endPtr);
     }
     if (input) free(input);
+    return value;
+}
+
+double getDoubleFromFile(char* input, int* error_code) {
+    char *endPtr = NULL;
+    errno = 0;
+    double value = strtod(input, &endPtr);
+    if (errno || *endPtr != '\0' || input == endPtr) {
+        *error_code = -1;
+        return value;
+    }
     return value;
 }
 

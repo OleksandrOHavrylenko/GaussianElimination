@@ -34,7 +34,7 @@ int forwardElimination(Matrix* matrix) {
         int maxRow = column;
         double maxValue = matrix->A[maxRow][column];
 
-        for (int row = nextRow; row < matrix->n; ++row) {
+        for (int row = nextRow; row < matrix->n; row++) {
             if (fabs(matrix->A[row][column]) > maxValue) {
                 maxValue = matrix->A[row][column];
                 maxRow = row;
@@ -52,12 +52,12 @@ int forwardElimination(Matrix* matrix) {
                 swapRow(matrix, nextRow, maxRow);
             }
 
-            for (int i = column+1; i < matrix->n; ++i) {
+            for (int i = column+1; i < matrix->n; i++) {
                 double divider = matrix->A[column][column];
                 if (fabs(divider) > ZERO) {
                     double f = matrix->A[i][column] / divider;
 
-                    for (int j = column+1; j < matrix->n; ++j) {
+                    for (int j = column+1; j < matrix->n; j++) {
                         matrix->A[i][j] -= matrix->A[column][j] * f;
                     }
 
@@ -79,8 +79,7 @@ int backSubstitution(Matrix* matrix) {
             return i;
         }
         matrix->X[i] = matrix->B[i];
-        for (int j=i+1; j<matrix->n; j++)
-        {
+        for (int j=i+1; j<matrix->n; j++) {
             matrix->X[i] -= matrix->A[i][j] * matrix->X[j];
         }
         matrix->X[i] = matrix->X[i] / matrix->A[i][i];

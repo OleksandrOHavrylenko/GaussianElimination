@@ -30,7 +30,7 @@ Matrix* initMatrixFromFile(Matrix* matrix, char *fileName) {
     fileInputStream = fopen(fileName, "r");
     if(fileInputStream == NULL)
     {
-        printf("\n\tUnable open the file. Please enter enter other file \n");
+        printf("\n\tUnable open the file. Please enter other filename \n");
         return NULL;
     }
     int error_code = 0;

@@ -133,13 +133,13 @@ double** initMatrixAFromFile(FILE * fileInputStream, int n) {
         record = strtok(line, ",");
         while (record != NULL && !error_code) {
             if (j > n-1) {
-                printf("\n\tIncorrect file in line: %d\n", i+1);
+                printf("\n\tIncorrect file in line: %d\n", i+2);
                 error_code = -1;
                 return NULL;
             }
             double value = getDoubleFromFile(record, &error_code);
             if (error_code) {
-                printf("\n\tNot a number at line: %d, position: %d \n", i+1, j+1);
+                printf("\n\tNot a number at line: %d, position: %d \n", i+2, j+1);
                 return NULL;
             }
             A[i][j++] = value;
@@ -168,13 +168,13 @@ double* initMatrixBFromFile(FILE * fileInputStream, int n) {
         record = strtok(line, ",");
         while (record != NULL && !error_code) {
             if (j > n-1) {
-                printf("\tIncorrect file in line: %d\n", i+1);
+                printf("\tIncorrect file in line: %d\n", i+2);
                 error_code = -1;
                 return NULL;
             }
             double value = getDoubleFromFile(record, &error_code);
             if (error_code) {
-                printf("\n\tNot a number at line: %d, position: %d \n", i+1, j+1);
+                printf("\n\tNot a number at line: %d, position: %d \n", i+2, j+1);
                 return NULL;
             }
             B[j++] = value;
